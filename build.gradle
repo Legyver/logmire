@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+}
+
+group 'com.legyver.logmire'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    //async
+    compile group: 'com.legyver', name: 'tuktukfx', version: '1.0.0.0'
+
+    //parse
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.3'
+
+    //ui
+    compile 'com.jfoenix:jfoenix:8.0.7' // Java 8
+    compile group: 'com.legyver', name: 'fenxlib-tuktukfx', version: '1.1.1.0'
+    compile group: 'com.legyver', name: 'fenxlib-tasks', version: '1.1.1.0'
+    compile group: 'com.legyver', name: 'fenxlib-widgets', version: '1.1.1.0'
+
+    //utils - npe and mapqua
+    compile group: 'com.legyver', name: 'utils', version: '1.0.0.0'
+    //File utils
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    //Hash validation
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.14'
+
+    //logging
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.13.0'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
