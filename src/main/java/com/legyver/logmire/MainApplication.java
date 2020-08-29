@@ -30,7 +30,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
