@@ -15,6 +15,7 @@ import com.legyver.fenxlib.core.widget.about.AboutPageOptions;
 import com.legyver.logmire.config.ApplicationOptionsBuilder;
 import com.legyver.logmire.config.BindingFactory;
 import com.legyver.logmire.config.LogmireConfig;
+import com.legyver.logmire.config.LogmireVersionInfo;
 import com.legyver.logmire.task.TaskFactory;
 import com.legyver.logmire.task.openlog.OpenLogfileMenuFactory;
 import com.legyver.logmire.task.openlog.OpenLogfileProcessor;
@@ -61,6 +62,7 @@ public class MainApplication extends Application  {
 
 			ApplicationUIModel uiModel = (ApplicationUIModel) ApplicationContext.getUiModel();
 			LogmireConfig applicationConfig = (LogmireConfig) ApplicationContext.getApplicationConfig();
+			LogmireVersionInfo logmireVersionInfo = new LogmireVersionInfo();
 
 			Supplier<StackPane> centerContentReference = () -> {
 				Optional<StackPane> center = new ComponentQuery.QueryBuilder()
@@ -69,20 +71,11 @@ public class MainApplication extends Application  {
 				return center.get();
 			};
 
-			AboutPageOptions aboutPageOptions = new AboutPageOptions.Builder(getClass())
-					.dependenciesFile("licenses/license.properties")
-					.buildPropertiesFile("buildlabel.properties")
-					.copyrightPropertiesFile("licenses/copyright.properties")
-					.title("Logmire")
-					.intro("An logfile monitoring desktop client")
-					.build();
-			Properties buildProperties = aboutPageOptions.getBuildProperties();
-
 			SceneFactory sceneFactory = new SceneFactory(primaryStage, 1100, 750, MainApplication.class.getClassLoader().getResource("css/application.css"));
 
 			TaskFactory taskFactory = new TaskFactory();
 
-			OpenLogfileProcessor importProcessor = new OpenLogfileProcessor(taskFactory, bindingFactory, applicationConfig, buildProperties);
+			OpenLogfileProcessor importProcessor = new OpenLogfileProcessor(taskFactory, bindingFactory, applicationConfig, logmireVersionInfo.getBuildProperties());
 
 			Consumer<File> fileSelectionConsumer = file -> {
 				Optional<DataSourceUI> preexistingDataSource = uiModel.getOpenSources().stream()
@@ -116,7 +109,7 @@ public class MainApplication extends Application  {
 									),
 									new CenterOptions(new TextFieldFactory(false)),
 									new RightMenuOptions(
-											new MenuFactory("Help", new AboutMenuItemFactory("About", centerContentReference, aboutPageOptions))
+											new MenuFactory("Help", new AboutMenuItemFactory("About", centerContentReference, logmireVersionInfo.getAboutPageOptions()))
 									)
 							))
 					)
