@@ -1,12 +1,11 @@
 package com.legyver.logmire.task.openlog;
 
-import com.legyver.fenxlib.factory.menu.file.AbstractFileMenuFactory;
-import com.legyver.fenxlib.factory.menu.file.WorkingFileConfig;
+import com.legyver.fenxlib.core.factory.menu.file.AbstractFileMenuFactory;
 import javafx.stage.FileChooser;
 
 public class OpenLogfileMenuFactory extends AbstractFileMenuFactory {
-	public OpenLogfileMenuFactory(WorkingFileConfig workingFileConfig) {
-		super(workingFileConfig);
+	public OpenLogfileMenuFactory() {
+		super();
 	}
 
 	@Override

@@ -1,18 +1,19 @@
 package com.legyver.logmire;
 
-import com.legyver.fenxlib.factory.*;
-import com.legyver.fenxlib.factory.menu.*;
-import com.legyver.fenxlib.factory.menu.file.OpenFileDecorator;
-import com.legyver.fenxlib.factory.menu.file.WorkingFileConfig;
-import com.legyver.fenxlib.factory.options.BorderPaneInitializationOptions;
-import com.legyver.fenxlib.locator.query.ComponentQuery;
-import com.legyver.fenxlib.tasks.factory.TaskPanelFactory;
-import com.legyver.fenxlib.uimodel.FileOptions;
-import com.legyver.fenxlib.util.GuiUtil;
-import com.legyver.fenxlib.widget.about.AboutMenuItemFactory;
-import com.legyver.fenxlib.widget.about.AboutPageOptions;
+import com.legyver.core.exception.CoreException;
+import com.legyver.fenxlib.core.config.options.ApplicationOptions;
+import com.legyver.fenxlib.core.context.ApplicationContext;
+import com.legyver.fenxlib.core.factory.*;
+import com.legyver.fenxlib.core.factory.menu.*;
+import com.legyver.fenxlib.core.factory.menu.file.OpenFileDecorator;
+import com.legyver.fenxlib.core.factory.options.BorderPaneInitializationOptions;
+import com.legyver.fenxlib.core.factory.options.RegionInitializationOptions;
+import com.legyver.fenxlib.core.locator.query.ComponentQuery;
+import com.legyver.fenxlib.core.uimodel.FileOptions;
+import com.legyver.fenxlib.core.widget.about.AboutMenuItemFactory;
+import com.legyver.fenxlib.core.widget.about.AboutPageOptions;
+import com.legyver.logmire.config.ApplicationOptionsBuilder;
 import com.legyver.logmire.config.BindingFactory;
-import com.legyver.logmire.config.LogmireApplicationOptions;
 import com.legyver.logmire.config.LogmireConfig;
 import com.legyver.logmire.task.TaskFactory;
 import com.legyver.logmire.task.openlog.OpenLogfileMenuFactory;
@@ -34,27 +35,35 @@ import java.util.function.Supplier;
 
 import static com.legyver.logmire.config.BindingFactory.LOG_TABS;
 
-public class MainApplication extends Application {
-	private static final Logger logger = LogManager.getLogger(MainApplication.class);
+public class MainApplication extends Application  {
+	private static Logger logger;
 	public static final String TOGGLE_CONTROLS = "Controls";
 
+	private static ApplicationOptions applicationOptions;
 	private BindingFactory bindingFactory;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws CoreException {
+		applicationOptions = new ApplicationOptionsBuilder()
+				.appName("Logmire")
+				.customAppConfigInstantiator(map -> new LogmireConfig(map))
+				.uiModel(new ApplicationUIModel())
+				.build();//build() calls bootstrap() which inits logging
+		logger = LogManager.getLogger(MainApplication.class);
 		launch(args);
 	}
 
 	@Override
-	public void start(Stage primaryStage) throws Exception {
+	public void start(Stage primaryStage) {
 		try {
-			logger.info("Starting application");
+			logger.info("Initializing application");
+			applicationOptions.startup();
+			bindingFactory = new BindingFactory();
 
-			LogmireApplicationOptions applicationOptions = new LogmireApplicationOptions(primaryStage);
-			GuiUtil.init(applicationOptions);
-			bindingFactory = new BindingFactory(applicationOptions);
+			ApplicationUIModel uiModel = (ApplicationUIModel) ApplicationContext.getUiModel();
+			LogmireConfig applicationConfig = (LogmireConfig) ApplicationContext.getApplicationConfig();
 
 			Supplier<StackPane> centerContentReference = () -> {
-				Optional<StackPane> center = new ComponentQuery.QueryBuilder(applicationOptions.getComponentRegistry())
+				Optional<StackPane> center = new ComponentQuery.QueryBuilder()
 						.inRegion(BorderPaneInitializationOptions.REGION_CENTER)
 						.type(StackPane.class).execute();
 				return center.get();
@@ -70,20 +79,12 @@ public class MainApplication extends Application {
 			Properties buildProperties = aboutPageOptions.getBuildProperties();
 
 			SceneFactory sceneFactory = new SceneFactory(primaryStage, 1100, 750, MainApplication.class.getClassLoader().getResource("css/application.css"));
-			ApplicationUIModel uiModel = applicationOptions.getUiModel();
 
 			TaskFactory taskFactory = new TaskFactory();
-			LogmireConfig applicationConfig = (LogmireConfig) applicationOptions.getApplicationConfig();
 
 			OpenLogfileProcessor importProcessor = new OpenLogfileProcessor(taskFactory, bindingFactory, applicationConfig, buildProperties);
-			FileOptions workingFile = uiModel.getWorkingFileOptions();
-			WorkingFileConfig workingFileConfig = applicationOptions.getWorkingFileConfig();
+
 			Consumer<File> fileSelectionConsumer = file -> {
-				workingFileConfig.setInitialDirectory(file.getParentFile());
-				workingFile.setFile(file);
-				workingFile.setFilePath(file.getAbsolutePath());
-				workingFile.setFileName(file.getName());
-				workingFile.setNewFile(false);//once it has been opened/saved-as it can be saved via save option
 				Optional<DataSourceUI> preexistingDataSource = uiModel.getOpenSources().stream()
 						.filter(ds -> ds.getSource().getAbsolutePath().equals(file.getAbsolutePath()))
 						.findFirst();
@@ -98,16 +99,17 @@ public class MainApplication extends Application {
 			};
 
 			BorderPaneInitializationOptions options = new BorderPaneInitializationOptions.Builder()
-					.center()
-					//popup will display over this. See the centerContentReference Supplier above
-					.factory(new StackPaneRegionFactory(true, new JFXTabPaneFactory(LOG_TABS)))
-					.up().top()
-					.displayContentByDefault()
-					.factory(new TopRegionFactory(
+					.center(new RegionInitializationOptions.Builder()
+							//popup will display over this. See the centerContentReference Supplier above
+							.factory(new StackPaneRegionFactory(true, new JFXTabPaneFactory(LOG_TABS)))
+					)
+					.top(new RegionInitializationOptions.Builder()
+							.displayContentByDefault()
+							.factory(new TopRegionFactory(
 									new LeftMenuOptions(
 											new MenuFactory("File",
-													new OpenFileDecorator("Open", "Select logfile to open", new OpenLogfileMenuFactory(workingFileConfig), file -> {
-														fileSelectionConsumer.accept(file);
+													new OpenFileDecorator("Open", "Select logfile to open", new OpenLogfileMenuFactory(), fileOptions -> {
+														fileSelectionConsumer.accept(fileOptions.getFile());
 													}),
 													new ExitMenuItemFactory("Exit")
 											)
@@ -116,11 +118,17 @@ public class MainApplication extends Application {
 									new RightMenuOptions(
 											new MenuFactory("Help", new AboutMenuItemFactory("About", centerContentReference, aboutPageOptions))
 									)
-							)
-					).up().bottom().factory(BottomRegionFactory.INSTANCE)
-					.up().right(TaskPanelFactory.TASKS_MENU_TOGGLE_BUTTON).factory(
-							new AccordionMenuFactory(new TitledPaneFactory(TaskPanelFactory.TASKS_PANE_TITLE, new TaskPanelFactory()))
-					).up().build();
+							))
+					)
+					.bottom(new RegionInitializationOptions.SideAwareBuilder()
+							.factory(BottomRegionFactory.INSTANCE)
+					)
+//					.right(new RegionInitializationOptions.SideBuilder(TaskPanelFactory.TASKS_MENU_TOGGLE_BUTTON)
+//						.factory(
+//							new AccordionMenuFactory(new TitledPaneFactory(TaskPanelFactory.TASKS_PANE_TITLE, new TaskPanelFactory())
+//						)
+//					)
+			.build();
 
 			BorderPane root = new BorderPaneFactory(options).makeBorderPane();
 

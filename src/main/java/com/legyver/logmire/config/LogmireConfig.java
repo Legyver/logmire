@@ -1,6 +1,6 @@
 package com.legyver.logmire.config;
 
-import com.legyver.fenxlib.config.GsonApplicationConfig;
+import com.legyver.fenxlib.core.config.GsonApplicationConfig;
 
 import java.util.Map;
 

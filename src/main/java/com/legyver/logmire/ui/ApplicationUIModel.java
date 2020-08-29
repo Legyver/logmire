@@ -1,8 +1,8 @@
 package com.legyver.logmire.ui;
 
-import com.legyver.fenxlib.uimodel.DefaultFileOptions;
-import com.legyver.fenxlib.uimodel.FileOptions;
-import com.legyver.fenxlib.uimodel.RecentFileAware;
+import com.legyver.fenxlib.core.uimodel.DefaultFileOptions;
+import com.legyver.fenxlib.core.uimodel.FileOptions;
+import com.legyver.fenxlib.core.uimodel.RecentFileAware;
 import com.legyver.logmire.ui.bean.DataSourceUI;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -16,7 +16,6 @@ public class ApplicationUIModel implements RecentFileAware {
 	private final ObservableList<DataSourceUI> openSources = FXCollections.observableArrayList();
 	private final ObjectProperty<DataSourceUI> activeSource = new SimpleObjectProperty<>();
 
-	private DefaultFileOptions defaultFileOptions = new DefaultFileOptions();
 	private ObservableList<FileOptions> recentFiles = FXCollections.observableArrayList();
 
 	public DataSourceUI getActiveSource() {
@@ -52,17 +51,8 @@ public class ApplicationUIModel implements RecentFileAware {
 	}
 
 	@Override
-	public FileOptions getWorkingFileOptions() {
-		return defaultFileOptions;
-	}
-
-	@Override
 	public List<FileOptions> getRecentFiles() {
 		return recentFiles;
-	}
-
-	public void setDefaultFileOptions(DefaultFileOptions defaultFileOptions) {
-		this.defaultFileOptions = defaultFileOptions;
 	}
 
 	public void setRecentFiles(List<FileOptions> recentFiles) {
