@@ -35,6 +35,7 @@ public class OpenLogfileProcessor {
 		DataSourceUI dataSource = new DataSourceUI(logFile);
 		bindingFactory.bindNewTab(dataSource);
 
+		LogLineAccumulator logLineAccumulator = new LogLineAccumulator(dataSource);
 		int lines = 0;
 		int characters = 0;
 		try {
@@ -44,6 +45,7 @@ public class OpenLogfileProcessor {
 				while ((line = in.readLine()) != null) {
 					lines++;
 					characters += line.length() + System.lineSeparator().length();
+					logLineAccumulator.addLine(line);
 				}
 			}
 			logFile.toPath().getParent().register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
