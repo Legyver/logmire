@@ -1,25 +1,19 @@
 package com.legyver.logmire.ui.tabs;
 
+import com.legyver.logmire.ui.bean.LogLineUI;
 import javafx.scene.control.Control;
 import javafx.scene.control.Skin;
 import org.apache.commons.lang3.StringUtils;
 
 public class LogLine extends Control {
+	private final LogLineUI value;
 
-	private final String plainText;
-	private final String truncated;
-
-	public LogLine(String plainText) {
-		this.plainText = plainText;
-		this.truncated = StringUtils.isBlank(plainText) || plainText.length() < 200 ? plainText : plainText.substring(0, 200);
-	}
-
-	public String getPlainText() {
-		return plainText;
+	public LogLine(LogLineUI logLineUI) {
+		this.value = logLineUI;
 	}
 
 	public String getTruncated() {
-		return truncated;
+		return value.getTruncated();
 	}
 
 	public Skin<?> createDefaultSkin() {

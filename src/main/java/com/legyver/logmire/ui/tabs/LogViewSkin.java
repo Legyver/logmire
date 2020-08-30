@@ -1,14 +1,12 @@
 package com.legyver.logmire.ui.tabs;
 
 import com.legyver.logmire.ui.bean.DataSourceUI;
+import com.legyver.logmire.ui.bean.LogLineUI;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.geometry.Pos;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SkinBase;
 import javafx.scene.control.SplitPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,8 +21,6 @@ public class LogViewSkin extends SkinBase<LogView> {
 	public LogViewSkin(LogView logView) {
 		super(logView);
 		logs = new ListView<>();
-//		logs.setCellFactory(logLineListView -> new LeftAlignedListViewCell());
-		logs.setCenterShape(false);
 		detailPane = new StackPane();
 		mainSplitPane = new SplitPane(logs, detailPane);
 
@@ -35,13 +31,13 @@ public class LogViewSkin extends SkinBase<LogView> {
 
 	private void initLogs(LogView logView) {
 		DataSourceUI dataSourceUI = logView.getDataSourceUI();
-		ObservableList<String> logLines = dataSourceUI.getLines();
+		ObservableList<LogLineUI> logLines = dataSourceUI.getLines();
 
 		dataSourceUI.acquireLock();
-		dataSourceUI.getLines().addListener((ListChangeListener<String>) change -> {
+		logLines.addListener((ListChangeListener<LogLineUI>) change -> {
 			if (change.next()) {
 				if (change.wasAdded()) {
-					for (String added : change.getAddedSubList()) {
+					for (LogLineUI added : change.getAddedSubList()) {
 						addLine(added);
 					}
 				} else {
@@ -50,14 +46,14 @@ public class LogViewSkin extends SkinBase<LogView> {
 				}
 			};
 		});
-		logLines.stream().forEach(s -> {
-			addLine(s);
+		logLines.stream().forEach(logLineUI -> {
+			addLine(logLineUI);
 		});
 		dataSourceUI.releaseLock();
 	}
 
-	private void addLine(String s) {
-		logs.getItems().add(new LogLine(s));
+	private void addLine(LogLineUI logLineUI) {
+		logs.getItems().add(new LogLine(logLineUI));
 	}
 
 //	private class LeftAlignedListViewCell extends javafx.scene.control.ListCell<LogLine> {

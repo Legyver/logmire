@@ -1,5 +1,6 @@
 package com.legyver.logmire.ui.bean;
 
+import com.legyver.logmire.task.openlog.LogLineAccumulator;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,13 +19,16 @@ public class DataSourceUI {
 	private final StringProperty sourceName = new SimpleStringProperty();
 	private final StringProperty sourcePath = new SimpleStringProperty();
 	private final ObjectProperty<File> source = new SimpleObjectProperty<>();
-	private final ObservableList<String> lines = FXCollections.observableArrayList();
+	private final ObservableList<LogLineUI> lines = FXCollections.observableArrayList();
 	private final Semaphore mutex = new Semaphore(1);
+	private LogLineAccumulator logLineAccumulator;
+	private LogLineUI current;
 
 	public DataSourceUI(File file) {
 		source.set(file);
 		sourcePath.setValue(file.getAbsolutePath());
 		sourceName.setValue(file.getName());
+		logLineAccumulator = new LogLineAccumulator();
 	}
 
 	public String getSourceName() {
@@ -89,12 +93,23 @@ public class DataSourceUI {
 	}
 
 	public void addLine(String line) {
-		acquireLock();
-		lines.add(line);
-		releaseLock();
+		LogLineUI current = logLineAccumulator.addLine(line);
+		//check to see if the same instance
+		if (this.current != current) {
+			acquireLock();
+			//we want to eagerly add lines, so we ensure the last line is never not-processed
+			lines.add(current);
+			if (this.current != null) {
+				//retrospectively beak down log into constituent parts
+				this.current.deconstruct();
+			}
+			this.current = current;
+			releaseLock();
+		}
+
 	}
 
-	public ObservableList<String> getLines() {
+	public ObservableList<LogLineUI> getLines() {
 		return lines;
 	}
 }
