@@ -6,6 +6,7 @@ import com.legyver.fenxlib.core.context.ApplicationContext;
 import com.legyver.fenxlib.core.factory.*;
 import com.legyver.fenxlib.core.factory.menu.*;
 import com.legyver.fenxlib.core.factory.menu.file.OpenFileDecorator;
+import com.legyver.fenxlib.core.factory.menu.file.RecentlyOpenedFileFactory;
 import com.legyver.fenxlib.core.factory.options.BorderPaneInitializationOptions;
 import com.legyver.fenxlib.core.factory.options.RegionInitializationOptions;
 import com.legyver.fenxlib.core.locator.query.ComponentQuery;
@@ -103,6 +104,7 @@ public class MainApplication extends Application  {
 													new OpenFileDecorator("Open", "Select logfile to open", new OpenLogfileMenuFactory(), fileOptions -> {
 														fileSelectionConsumer.accept(fileOptions.getFile());
 													}),
+													new RecentlyOpenedFileFactory("Recent", fileSelectionConsumer),
 													new ExitMenuItemFactory("Exit")
 											)
 									),
