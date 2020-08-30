@@ -56,20 +56,4 @@ public class LogViewSkin extends SkinBase<LogView> {
 		logs.getItems().add(new LogLine(logLineUI));
 	}
 
-//	private class LeftAlignedListViewCell extends javafx.scene.control.ListCell<LogLine> {
-//		@Override
-//		protected void updateItem(LogLine item, boolean empty) {
-//			super.updateItem(item, empty);
-//			if (empty) {
-//				setGraphic(null);
-//			} else {
-//				// Create the HBox
-//				HBox hBox = new HBox();
-//				hBox.setAlignment(Pos.BASELINE_LEFT);
-//
-//				hBox.getChildren().add(item);
-//				setGraphic(hBox);
-//			}
-//		}
-//	}
 }
