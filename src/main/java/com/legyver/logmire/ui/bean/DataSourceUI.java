@@ -97,12 +97,8 @@ public class DataSourceUI {
 		//check to see if the same instance
 		if (this.current != current) {
 			acquireLock();
-			//we want to eagerly add lines, so we ensure the last line is never not-processed
+			//we want to eagerly add lines, so we ensure the last line is always available and not waiting for a new line
 			lines.add(current);
-			if (this.current != null) {
-				//retrospectively beak down log into constituent parts
-				this.current.deconstruct();
-			}
 			this.current = current;
 			releaseLock();
 		}
