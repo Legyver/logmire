@@ -40,6 +40,20 @@ public class LogLineAccumulatorTest {
 	}
 
 	@Test
+	public void parseSingleLineDateTimestampExecutor() throws Exception {
+		String line = "2020-06-12 11:26:39,393 ERROR [ProfileServiceBootstrap] (Thread-2) Failed to load profile:: org.jboss.deployers.client.spi.IncompleteDeploymentException: Summary of incomplete deployments (SEE PREVIOUS ERRORS FOR DETAILS):\n";
+		LogLineAccumulator logLineAccumulator = new LogLineAccumulator();
+		LogLineUI logLineUI = logLineAccumulator.addLine(line);
+		assertEquals(line, logLineUI.getPlainText());
+		assertEquals("2020-06-12", logLineUI.getDate());
+		assertEquals("11:26:39,393", logLineUI.getTimestamp());
+		assertEquals("ERROR", logLineUI.getSeverity());
+		assertEquals("ProfileServiceBootstrap", logLineUI.getReporter());
+		assertEquals("Thread-2", logLineUI.getExecutor());
+		assertEquals("Failed to load profile:: org.jboss.deployers.client.spi.IncompleteDeploymentException: Summary of incomplete deployments (SEE PREVIOUS ERRORS FOR DETAILS):", logLineUI.getShortMessage());
+	}
+
+	@Test
 	public void parseMultiLineTimestamp() throws Exception {
 		String line = "11:23:40,431 INFO  [AbstractJBossASServerBase] Server Configuration:\r\n"
 				+ "\r\n"

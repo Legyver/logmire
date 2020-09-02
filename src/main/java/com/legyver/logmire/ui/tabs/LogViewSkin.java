@@ -10,6 +10,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.SkinBase;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,16 +20,20 @@ public class LogViewSkin extends SkinBase<LogView> {
 
 	private final SplitPane mainSplitPane;
 	private final ListView<LogLine> logs;
-	private final StackPane detailPane;
+	private final AnchorPane detailPane;
 	private final LogLineDetail logLineDetail;
 
 	public LogViewSkin(LogView logView) {
 		super(logView);
 		logs = new ListView<>();
-		logLineDetail = new LogLineDetail();
-		logLineDetail.setVisible(false);
-		detailPane = new StackPane(logLineDetail);
+		detailPane = new AnchorPane();
 		mainSplitPane = new SplitPane(logs, detailPane);
+
+		logLineDetail = new LogLineDetail(detailPane.widthProperty());
+		logLineDetail.setVisible(false);
+		detailPane.getChildren().add(logLineDetail);
+		AnchorPane.setLeftAnchor(logLineDetail, 0.0);
+		AnchorPane.setRightAnchor(logLineDetail, 0.0);
 
 		initFocusLogListener(logView);
 		initLogs(logView);

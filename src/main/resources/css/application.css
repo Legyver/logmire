@@ -4,6 +4,9 @@
 	-fx-base: #3e4d66;
 }
 
+.logline-detail {
+    -fx-background-color: #696a9b;
+}
 .button {
 	-fx-padding: 0.7em 0.57em;
 	-fx-font-size: 14px;
@@ -21,9 +24,7 @@
 .jfx-tab-pane .tab-header-background {
 	-fx-background-color: #696a9b;
 }
-.jfx-tab-pane .text-field {
-	-fx-background-color: #ffffff;
-}
+
 .split-pane > .split-pane-divider {
 	-fx-padding: 0 0.25em 0 0.25em; /* 0 3 0 3 */
 }

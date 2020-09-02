@@ -17,7 +17,7 @@ public class LogLineAccumulator {
 	 * group 4: (Optional) executor
 	 * group 6: message
 	 */
-	private static final String MESSAGE_REGEX = "\\[(([a-zA-Z0-9.])+)\\] (\\(((.)*)\\))?((.)+)";
+	private static final String MESSAGE_REGEX = "\\[(([a-zA-Z0-9.])+)\\] (\\((([^)])+)\\))?((.)+)";
 	/**
 	 * group 1: location
 	 */

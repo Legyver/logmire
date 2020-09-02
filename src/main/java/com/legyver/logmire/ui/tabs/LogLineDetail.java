@@ -1,8 +1,7 @@
 package com.legyver.logmire.ui.tabs;
 
 import com.legyver.logmire.ui.bean.StackTraceElementUI;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Control;
@@ -10,6 +9,7 @@ import javafx.scene.control.Skin;
 
 
 public class LogLineDetail extends Control {
+	private final ReadOnlyDoubleProperty parentWidth;
 	private final StringProperty date = new SimpleStringProperty();
 	private final StringProperty timestamp = new SimpleStringProperty();
 	private final StringProperty severity = new SimpleStringProperty();
@@ -21,6 +21,14 @@ public class LogLineDetail extends Control {
 
 	private final ObservableList<StackTraceElementUI> stackTraceElements = FXCollections.observableArrayList();
 
+	public LogLineDetail(ReadOnlyDoubleProperty parentWidth) {
+		this.parentWidth = parentWidth;
+		getStyleClass().add("logline-detail");
+	}
+
+	public ReadOnlyDoubleProperty parentWidthProperty() {
+		return parentWidth;
+	}
 
 	public String getDate() {
 		return date.get();
