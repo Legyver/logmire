@@ -34,6 +34,8 @@ public class LogViewSkin extends SkinBase<LogView> {
 		detailPane.getChildren().add(logLineDetail);
 		AnchorPane.setLeftAnchor(logLineDetail, 0.0);
 		AnchorPane.setRightAnchor(logLineDetail, 0.0);
+		AnchorPane.setTopAnchor(logLineDetail, 0.0);
+		AnchorPane.setBottomAnchor(logLineDetail, 0.0);
 
 		initFocusLogListener(logView);
 		initLogs(logView);
