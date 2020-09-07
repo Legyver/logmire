@@ -31,15 +31,6 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 		try {
 			Label messageLabel = new Label("Message");
 			Node message = make(new TextArea(), logLineDetail.fullMessageProperty());
-			EventHandler<MouseEvent> onClickCopy = onClickCopy(logLineDetail.copyableMessageProperty());
-			SVGControl svgControl = new SVGControl();
-			svgControl.setSvgIcon("file-text-o");
-			svgControl.setSvgIconPaint(Paint.valueOf("#68b1e3"));
-			svgControl.setSvgIconSize(20);
-			Region spacer = new Region();
-			VBox vBox = new VBox(svgControl, spacer);
-			VBox.setVgrow(spacer, Priority.ALWAYS);
-			svgControl.setOnMouseClicked(onClickCopy);
 
 			Label reporterLabel = new Label("Reporter");
 			Node reporter = make(new TextField(), logLineDetail.reporterProperty());
@@ -56,27 +47,62 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 			Label severityLabel = new Label("Severity");
 			Node severity = make(new TextField(), logLineDetail.severityProperty());
 
+			Label rootErrorLabel = new Label("Root error");
+			Node rootError = make(new TextField(), logLineDetail.rootErrorProperty());
+
+			Label rootLocationLabel = new Label("Root location");
+			Node rootLocation = make(new TextField(), logLineDetail.rootLocationProperty());
+
+			Label errorsLabel = new Label("Errors");
+
+			Label stackLabel = new Label("Stack trace");
+
+
 			int row = 0;
 			gridPane.addRow(row, timestampLabel, timestamp, dateLabel, date, executorLabel, executor);
 			GridPane.setHgrow(executor, Priority.ALWAYS);
-			row++;
 
+			row++;
 			gridPane.add(severityLabel, 0, row);
 			gridPane.add(severity, 1, row);
 			gridPane.add(reporterLabel, 2, row);
 			gridPane.add(reporter, 3, row, 3, 1);
 			GridPane.setHgrow(reporter, Priority.ALWAYS);
-			row++;
 
-			gridPane.add(messageLabel, 0, row);
-			gridPane.add(message, 1, row, 5, 1);
-			gridPane.add(vBox, 6, row, 1, 1);//copy icon to right of message
-			GridPane.setValignment(vBox, VPos.TOP);
-			GridPane.setHgrow(message, Priority.ALWAYS);
+			row++;
+			copyRow(row, messageLabel, message, logLineDetail.copyableMessageProperty());
+
+			row++;
+			copyRow(row, rootErrorLabel, rootError, logLineDetail.rootErrorProperty());
+
+			row++;
+			copyRow(row, rootLocationLabel, rootLocation, logLineDetail.rootLocationProperty());
 
 		} finally {
 			getChildren().add(gridPane);
 		}
+	}
+
+	private void copyRow(int row, Label label, Node node, StringProperty copyableProperty) {
+		gridPane.add(label, 0, row);
+		gridPane.add(node, 1, row, 5, 1);
+		VBox vBox = copyVBox(onClickCopy(copyableProperty));
+		gridPane.add(vBox, 6, row, 1, 1);//copy icon to right of message
+		GridPane.setValignment(vBox, VPos.TOP);
+		GridPane.setHgrow(node, Priority.ALWAYS);
+	}
+
+	private VBox copyVBox(EventHandler<MouseEvent> onClickCopy) {
+		SVGControl svgControl = new SVGControl();
+		svgControl.setSvgIcon("copy, files-o");
+		svgControl.setSvgIconPaint(Paint.valueOf("#68b1e3"));
+		svgControl.setSvgIconSize(20);
+
+		svgControl.setOnMouseClicked(onClickCopy);
+		Region spacer = new Region();
+		VBox vBox = new VBox(svgControl, spacer);
+		VBox.setVgrow(spacer, Priority.ALWAYS);
+		return vBox;
 	}
 
 	private EventHandler<MouseEvent> onClickCopy(StringProperty property) {

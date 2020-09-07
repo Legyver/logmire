@@ -11,7 +11,6 @@ import javafx.scene.control.SkinBase;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,7 +28,7 @@ public class LogViewSkin extends SkinBase<LogView> {
 		detailPane = new AnchorPane();
 		mainSplitPane = new SplitPane(logs, detailPane);
 
-		logLineDetail = new LogLineDetail(detailPane.widthProperty());
+		logLineDetail = new LogLineDetail();
 		logLineDetail.setVisible(false);
 		detailPane.getChildren().add(logLineDetail);
 		AnchorPane.setLeftAnchor(logLineDetail, 0.0);
@@ -59,6 +58,8 @@ public class LogViewSkin extends SkinBase<LogView> {
 				logLineDetail.setCopyableMessage(newValue.getShortMessage());
 				logLineDetail.setReporter(newValue.getReporter());
 				logLineDetail.setTimestamp(newValue.getTimestamp());
+				logLineDetail.setRootError(newValue.getRootError());
+				logLineDetail.setRootLocation(newValue.getRootLocation());
 
 				newValue.acquireLock();
 				newValue.getStackTraceElements().stream().forEach(stackTraceElementUI -> logLineDetail.getStackTraceElements().add(stackTraceElementUI));

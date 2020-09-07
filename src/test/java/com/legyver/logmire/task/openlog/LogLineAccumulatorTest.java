@@ -188,6 +188,9 @@ public class LogLineAccumulatorTest {
 		}
 		assertEquals("InvocationTargetException occurred, root cause: Error updating object [com.example.package.MyBean@56930e80]: Unable to add object of class [com.example.package.MyBean]: com.example.package.exception.ExampleException: Error updating object [com.example.package.MyBean@56930e80]: Unable to add object of class [com.example.package.MyBean]", logLineUI.getFirstLine());
 		assertEquals("Unable to add object of class [com.example.package.MyBean]", logLineUI.getShortMessage());
+		assertEquals("unique constraint (SCHEMA.AK0MY_UNIQUE_CONSTRAINT) violated", logLineUI.getRootError());
+		assertEquals("DaoService.java:1189", logLineUI.getRootLocation());
+
 		assertThat(logLineUI.getStackTraceElements(), new NonExhaustiveListMatcher(
 				expectedStackTraceElement(
 				"at com.example.package.util.PersistenceUtil.createObject(PersistenceUtil.java:277) [:]",

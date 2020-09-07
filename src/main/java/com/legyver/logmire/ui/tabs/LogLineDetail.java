@@ -9,7 +9,6 @@ import javafx.scene.control.Skin;
 
 
 public class LogLineDetail extends Control {
-	private final ReadOnlyDoubleProperty parentWidth;
 	private final StringProperty date = new SimpleStringProperty();
 	private final StringProperty timestamp = new SimpleStringProperty();
 	private final StringProperty severity = new SimpleStringProperty();
@@ -18,16 +17,13 @@ public class LogLineDetail extends Control {
 	private final StringProperty copyableMessage = new SimpleStringProperty();
 	private final StringProperty fullInfo = new SimpleStringProperty();
 	private final StringProperty executor = new SimpleStringProperty();
+	private final StringProperty rootError = new SimpleStringProperty();
+	private final StringProperty rootLocation = new SimpleStringProperty();
 
 	private final ObservableList<StackTraceElementUI> stackTraceElements = FXCollections.observableArrayList();
 
-	public LogLineDetail(ReadOnlyDoubleProperty parentWidth) {
-		this.parentWidth = parentWidth;
+	public LogLineDetail() {
 		getStyleClass().add("logline-detail");
-	}
-
-	public ReadOnlyDoubleProperty parentWidthProperty() {
-		return parentWidth;
 	}
 
 	public String getDate() {
@@ -124,6 +120,30 @@ public class LogLineDetail extends Control {
 
 	public void setExecutor(String executor) {
 		this.executor.set(executor);
+	}
+
+	public String getRootError() {
+		return rootError.get();
+	}
+
+	public StringProperty rootErrorProperty() {
+		return rootError;
+	}
+
+	public void setRootError(String rootError) {
+		this.rootError.set(rootError);
+	}
+
+	public String getRootLocation() {
+		return rootLocation.get();
+	}
+
+	public StringProperty rootLocationProperty() {
+		return rootLocation;
+	}
+
+	public void setRootLocation(String rootLocation) {
+		this.rootLocation.set(rootLocation);
 	}
 
 	public ObservableList<StackTraceElementUI> getStackTraceElements() {

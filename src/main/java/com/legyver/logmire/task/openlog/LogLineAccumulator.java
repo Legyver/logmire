@@ -2,8 +2,10 @@ package com.legyver.logmire.task.openlog;
 
 import com.legyver.logmire.ui.bean.CausalSectionUI;
 import com.legyver.logmire.ui.bean.LogLineUI;
+import com.legyver.logmire.ui.bean.StackTraceElementUI;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -60,6 +62,41 @@ public class LogLineAccumulator {
 	private void processCausedBy(String line) {
 		String reason = line.substring(11);//"Caused by: "
 		causalSectionUI.setShortMessage(reason);
+		//deliberately overwriting earlier values as each "Caused by" gets closer to the root error
+		if (reason.contains(": ")) {
+			currentLog.setRootError(getLastSplit(reason));
+		} else {
+			currentLog.setRootError(reason);
+		}
+		//replay the previous stack to get the location
+		if (currentLog.getCausalStackTraceSections().size() > 0) {
+			CausalSectionUI previousStack = currentLog.getCausalStackTraceSections().get(currentLog.getCausalStackTraceSections().size() - 1);
+			List<StackTraceElementUI> stackTraceElements = previousStack.getStackTraceElements();
+			//find the last non-internal location
+			for (int i = stackTraceElements.size() - 1; i > -1; i--) {
+				StackTraceElementUI stackTraceElementUI = stackTraceElements.get(i);
+				String location = stackTraceElementUI.getLocation();
+				if (!startsWithAny(location, "java.", "javax.", "sun.", "com.oracle.", "org.apache.", "org.jboss.", "org.springframework.")) {//TODO: externalize
+					currentLog.setRootLocation(location);
+					break;
+				}
+			}
+		}
+	}
+
+	private boolean startsWithAny(String value, String...prefixes) {
+		return Stream.of(prefixes).anyMatch(prefix -> value.startsWith(prefix));
+	}
+
+	private static String getLastSplit(String value) {
+		String[] parts = value.split(": ");
+		for (int i = parts.length - 1; i > -1; i--) {
+			String part = parts[i];
+			if (!StringUtils.isAllBlank(part)) {
+				return part;
+			}
+		}
+		return value;
 	}
 
 	private void processStackTraceElement(String line) {
@@ -159,14 +196,7 @@ public class LogLineAccumulator {
 			void setValue(LogLineUI logLineUI, String value) {
 				logLineUI.setFirstLine(value);
 				if (value != null && value.contains(": ")) {
-					String[] parts = value.split(": ");
-					for (int i = parts.length - 1; i > -1; i--) {
-						String part = parts[i];
-						if (!StringUtils.isAllBlank(part)) {
-							setTrimmedMessage(logLineUI, part);
-							break;
-						}
-					}
+					setTrimmedMessage(logLineUI, getLastSplit(value));
 					if (logLineUI.getShortMessage() == null) {
 						setTrimmedMessage(logLineUI, value);
 					}
@@ -176,10 +206,12 @@ public class LogLineAccumulator {
 			}
 
 			private void setTrimmedMessage(LogLineUI logLineUI, String value) {
-				if (value.endsWith(":")) {
-					logLineUI.setShortMessage(value.substring(0, value.length() - 1).trim());
-				} else {
-					logLineUI.setShortMessage(value.trim());
+				if (value != null) {
+					if (value.endsWith(":")) {
+						logLineUI.setShortMessage(value.substring(0, value.length() - 1).trim());
+					} else {
+						logLineUI.setShortMessage(value.trim());
+					}
 				}
 			}
 		}, REPORTER(MESSAGE_REGEX, 1) {

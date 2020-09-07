@@ -42,6 +42,16 @@ public class LogLineUI extends BaseLogEntry {
 	 */
 	private String firstLine;
 
+	/**
+	 * Root cause message extracted from stacktrace
+	 */
+	private String rootError;
+
+	/**
+	 * Root cause location extracted from stacktrace
+	 */
+	private String rootLocation;
+
 	private final ObservableList<CausalSectionUI> causalStackTraceSections = FXCollections.observableArrayList();
 
 	public String getPlainText() {
@@ -111,6 +121,22 @@ public class LogLineUI extends BaseLogEntry {
 
 	public void setExecutor(String executor) {
 		this.executor = executor;
+	}
+
+	public String getRootError() {
+		return rootError;
+	}
+
+	public void setRootError(String rootError) {
+		this.rootError = rootError;
+	}
+
+	public String getRootLocation() {
+		return rootLocation;
+	}
+
+	public void setRootLocation(String rootLocation) {
+		this.rootLocation = rootLocation;
 	}
 
 	public void accumulate(String line) {
