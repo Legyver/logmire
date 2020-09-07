@@ -158,20 +158,28 @@ public class LogLineAccumulator {
 			@Override
 			void setValue(LogLineUI logLineUI, String value) {
 				logLineUI.setFirstLine(value);
-				if (value != null && value.contains(":")) {
-					String[] parts = value.split(":");
+				if (value != null && value.contains(": ")) {
+					String[] parts = value.split(": ");
 					for (int i = parts.length - 1; i > -1; i--) {
 						String part = parts[i];
 						if (!StringUtils.isAllBlank(part)) {
-							logLineUI.setShortMessage(part.trim());
+							setTrimmedMessage(logLineUI, part);
 							break;
 						}
 					}
 					if (logLineUI.getShortMessage() == null) {
-						logLineUI.setShortMessage(value);
+						setTrimmedMessage(logLineUI, value);
 					}
 				} else {
-					logLineUI.setShortMessage(value);
+					setTrimmedMessage(logLineUI, value);
+				}
+			}
+
+			private void setTrimmedMessage(LogLineUI logLineUI, String value) {
+				if (value.endsWith(":")) {
+					logLineUI.setShortMessage(value.substring(0, value.length() - 1).trim());
+				} else {
+					logLineUI.setShortMessage(value.trim());
 				}
 			}
 		}, REPORTER(MESSAGE_REGEX, 1) {

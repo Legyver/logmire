@@ -55,6 +55,20 @@ public class LogLineAccumulatorTest {
 	}
 
 	@Test
+	public void parseSingleLineDateTimestampExecutorDoubleColons() throws Exception {
+		String line = "2020-06-12 11:44:10,755 ERROR [com.example.package.proxy.SomeProxy] (user.name@sometenant.onmicrosoft.com@127.0.0.1) InvocationTargetException occurred, root cause: Error updating object [com.example.package.MyBean@56930e80]: Unable to add object of class [{com::example::package::MyBean}@{metaloader}]: com.example.package.exception.ExampleException: Error updating object [com.example.package.MyBean@56930e80]: Unable to add object of class [{com::example::package::MyBean}@{persistenceservice}]\n";
+		LogLineAccumulator logLineAccumulator = new LogLineAccumulator();
+		LogLineUI logLineUI = logLineAccumulator.addLine(line);
+		assertEquals(line, logLineUI.getPlainText());
+		assertEquals("2020-06-12", logLineUI.getDate());
+		assertEquals("11:44:10,755", logLineUI.getTimestamp());
+		assertEquals("ERROR", logLineUI.getSeverity());
+		assertEquals("com.example.package.proxy.SomeProxy", logLineUI.getReporter());
+		assertEquals("user.name@sometenant.onmicrosoft.com@127.0.0.1", logLineUI.getExecutor());
+		assertEquals("Unable to add object of class [{com::example::package::MyBean}@{persistenceservice}]", logLineUI.getShortMessage());
+	}
+
+	@Test
 	public void parseMultiLineTimestamp() throws Exception {
 		String line = "11:23:40,431 INFO  [AbstractJBossASServerBase] Server Configuration:\r\n"
 				+ "\r\n"
