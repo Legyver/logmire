@@ -148,7 +148,9 @@ public class LogLineUI extends BaseLogEntry {
 	}
 
 	public void addCausalSection(CausalSectionUI causalSectionUI) {
+		acquireLock();
 		this.causalStackTraceSections.add(causalSectionUI);
+		releaseLock();
 	}
 
 }

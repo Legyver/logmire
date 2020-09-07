@@ -27,7 +27,17 @@ public class StackTraceElementUI {
 
 	@Override
 	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+
 		StackTraceElementUI other = (StackTraceElementUI) obj;
+		if ((stackTraceElementLine == null && other.stackTraceElementLine != null)
+			|| (location == null && other.location != null)
+			|| (copyableClassRef == null && other.copyableClassRef != null)) {
+			return false;
+		}
+
 		return stackTraceElementLine.equals(other.getStackTraceElementLine())
 				&& location.equals(other.getLocation())
 				&& copyableClassRef.equals(other.getCopyableClassRef());
@@ -35,6 +45,6 @@ public class StackTraceElementUI {
 
 	@Override
 	public String toString() {
-		return ReflectionToStringBuilder.toString(this);
+		return stackTraceElementLine;
 	}
 }

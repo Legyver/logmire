@@ -1,5 +1,6 @@
 package com.legyver.logmire.ui.tabs;
 
+import com.legyver.logmire.ui.bean.CausalSectionUI;
 import com.legyver.logmire.ui.bean.StackTraceElementUI;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -21,6 +22,7 @@ public class LogLineDetail extends Control {
 	private final StringProperty rootLocation = new SimpleStringProperty();
 
 	private final ObservableList<StackTraceElementUI> stackTraceElements = FXCollections.observableArrayList();
+	private final ObservableList<CausalSectionUI> causalSections = FXCollections.observableArrayList();
 
 	public LogLineDetail() {
 		getStyleClass().add("logline-detail");
@@ -148,6 +150,10 @@ public class LogLineDetail extends Control {
 
 	public ObservableList<StackTraceElementUI> getStackTraceElements() {
 		return stackTraceElements;
+	}
+
+	public ObservableList<CausalSectionUI> getCausalSections() {
+		return causalSections;
 	}
 
 	public Skin<?> createDefaultSkin() {

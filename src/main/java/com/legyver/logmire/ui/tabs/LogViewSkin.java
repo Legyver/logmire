@@ -1,5 +1,6 @@
 package com.legyver.logmire.ui.tabs;
 
+import com.legyver.logmire.ui.bean.CausalSectionUI;
 import com.legyver.logmire.ui.bean.DataSourceUI;
 import com.legyver.logmire.ui.bean.LogLineUI;
 import com.legyver.logmire.ui.bean.StackTraceElementUI;
@@ -71,7 +72,16 @@ public class LogViewSkin extends SkinBase<LogView> {
 					}
 				});
 
+				newValue.getCausalStackTraceSections().stream().forEach(causalSectionUI -> logLineDetail.getCausalSections().add(causalSectionUI));
+				newValue.getCausalStackTraceSections().addListener((ListChangeListener<CausalSectionUI>) change -> {
+					if (change.next()) {
+						if (change.wasAdded()) {
+							newValue.getCausalStackTraceSections().stream().forEach(causalSectionUI -> logLineDetail.getCausalSections().add(causalSectionUI));
+						}
+					}
+				});
 				newValue.releaseLock();
+
 			}
 		});
 

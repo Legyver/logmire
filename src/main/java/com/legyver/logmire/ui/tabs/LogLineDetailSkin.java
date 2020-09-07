@@ -1,6 +1,11 @@
 package com.legyver.logmire.ui.tabs;
 
+import com.legyver.logmire.ui.bean.CausalSectionUI;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
@@ -14,19 +19,28 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 	private static final Logger logger = LogManager.getLogger(LogLineDetailSkin.class);
 
 	private final GridPane gridPane;
+	private final ListView stacktrace;
+	private StringProperty copyableClassRef = new SimpleStringProperty();
+
 	public LogLineDetailSkin(LogLineDetail logLineDetail) {
 		super(logLineDetail);
 		gridPane = new GridPane();
 		gridPane.setVgap(10);
 		gridPane.setHgap(10);
 		gridPane.setPadding(new Insets(10));
+
+		stacktrace = new ListView();
 
 		try {
 			Label messageLabel = new Label("Message");
@@ -53,7 +67,30 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 			Label rootLocationLabel = new Label("Root location");
 			Node rootLocation = make(new TextField(), logLineDetail.rootLocationProperty());
 
-			Label errorsLabel = new Label("Errors");
+			Label causesLabel = new Label("Errors");
+			Label label = new Label(logLineDetail.getCopyableMessage());
+			label.setOnMouseClicked(new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent mouseEvent) {
+					logger.debug("moused clicked");
+				}
+			});
+			TreeItem causesRoot = new TreeItem<>(label);
+			TreeView causesTree = new TreeView<>(causesRoot);
+			causesTree.setShowRoot(false);
+
+			logLineDetail.getCausalSections().addListener((ListChangeListener<CausalSectionUI>) change -> {
+				if (change.next()) {
+					if (change.wasAdded()) {
+						List<? extends CausalSectionUI> addedList = change.getAddedSubList();
+						addedList.stream().forEach(causalSectionUI -> {
+							TreeItem currentLast = findLast(causesRoot);
+							addToTree(currentLast, addedList, 0);
+						});
+					}
+				}
+			});
+			addToTree(causesRoot, logLineDetail.getCausalSections(), 0);
 
 			Label stackLabel = new Label("Stack trace");
 
@@ -70,20 +107,66 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 			GridPane.setHgrow(reporter, Priority.ALWAYS);
 
 			row++;
-			copyRow(row, messageLabel, message, logLineDetail.copyableMessageProperty());
+			addCopyRow(row, messageLabel, message, logLineDetail.copyableMessageProperty());
 
 			row++;
-			copyRow(row, rootErrorLabel, rootError, logLineDetail.rootErrorProperty());
+			addCopyRow(row, rootErrorLabel, rootError, logLineDetail.rootErrorProperty());
 
 			row++;
-			copyRow(row, rootLocationLabel, rootLocation, logLineDetail.rootLocationProperty());
+			addCopyRow(row, rootLocationLabel, rootLocation, logLineDetail.rootLocationProperty());
 
+			row++;
+			gridPane.add(causesLabel, 0, row);
+			gridPane.add(causesTree, 1, row, 5, 3);
+
+			row+=3;
+			gridPane.add(stackLabel, 0, row);
+			gridPane.add(stacktrace, 1, row, 5, 4);
+			VBox vBox = copyVBox(onClickCopy(copyableClassRef));
+			gridPane.add(vBox, 6, row);
+			GridPane.setValignment(vBox, VPos.TOP);
+			GridPane.setHgrow(stacktrace, Priority.ALWAYS);
 		} finally {
 			getChildren().add(gridPane);
 		}
 	}
 
-	private void copyRow(int row, Label label, Node node, StringProperty copyableProperty) {
+	private TreeItem findLast(TreeItem<String> item) {
+		if (item.getChildren().isEmpty()) {
+			return item;
+		}
+		return findLast(item.getChildren().get(0));//assumes only one child
+	}
+
+	private void addToTree(TreeItem parent, List<? extends CausalSectionUI> causes, int cursor) {
+		if (cursor == causes.size()) {
+			return;
+		}
+		CausalSectionUI causalSectionUI = causes.get(cursor);
+		causalSectionUI.acquireLock();
+		Label label = new Label(deriveShort(causalSectionUI.getShortMessage()));
+
+		label.setOnMouseClicked(new StackTraceContext(causalSectionUI));
+		TreeItem treeNode = new TreeItem(label);
+		parent.getChildren().add(treeNode);
+		causalSectionUI.releaseLock();
+		addToTree(treeNode, causes, ++cursor);
+	}
+
+	private static String deriveShort(String shortMessage) {
+		if (shortMessage.contains(": ")) {
+			String[] parts = shortMessage.split(": ");
+			for (int i = parts.length - 1; i > -1; i--) {
+				String part = parts[i];
+				if (!StringUtils.isAllBlank(part)) {
+					return part.trim();
+				}
+			}
+		}
+		return shortMessage;
+	}
+
+	private void addCopyRow(int row, Label label, Node node, StringProperty copyableProperty) {
 		gridPane.add(label, 0, row);
 		gridPane.add(node, 1, row, 5, 1);
 		VBox vBox = copyVBox(onClickCopy(copyableProperty));
@@ -118,5 +201,25 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 		textInputControl.setEditable(false);
 		textInputControl.textProperty().bind(textProperty);
 		return textInputControl;
+	}
+
+	private class StackTraceContext implements EventHandler<MouseEvent> {
+		private final CausalSectionUI causalSectionUI;
+
+		private StackTraceContext(CausalSectionUI causalSectionUI) {
+			this.causalSectionUI = causalSectionUI;
+		}
+
+		@Override
+		public void handle(MouseEvent mouseEvent) {
+			stacktrace.getItems().clear();
+			List<Label> labels = causalSectionUI.getStackTraceElements().stream()
+					.map(stackTraceElementUI -> {
+						Label label = new Label(stackTraceElementUI.getStackTraceElementLine());
+						label.setOnMouseClicked(e-> copyableClassRef.set(stackTraceElementUI.getCopyableClassRef()));
+						return label;
+					}).collect(Collectors.toList());
+			stacktrace.setItems(FXCollections.observableArrayList(labels));
+		}
 	}
 }
