@@ -36,7 +36,8 @@ public class LogLineAccumulatorTest {
 		assertEquals("11:23:40,439", logLineUI.getTimestamp());
 		assertEquals("INFO", logLineUI.getSeverity());
 		assertEquals("AbstractServer", logLineUI.getReporter());
-		assertEquals("Starting: JBossAS [6.1.0.Final \"Neo\"]", logLineUI.getShortMessage());
+		assertEquals("Starting: JBossAS [6.1.0.Final \"Neo\"]", logLineUI.getFirstLine());
+		assertEquals("JBossAS [6.1.0.Final \"Neo\"]", logLineUI.getShortMessage());
 	}
 
 	@Test
@@ -50,7 +51,7 @@ public class LogLineAccumulatorTest {
 		assertEquals("ERROR", logLineUI.getSeverity());
 		assertEquals("ProfileServiceBootstrap", logLineUI.getReporter());
 		assertEquals("Thread-2", logLineUI.getExecutor());
-		assertEquals("Failed to load profile:: org.jboss.deployers.client.spi.IncompleteDeploymentException: Summary of incomplete deployments (SEE PREVIOUS ERRORS FOR DETAILS):", logLineUI.getShortMessage());
+		assertEquals("Summary of incomplete deployments (SEE PREVIOUS ERRORS FOR DETAILS)", logLineUI.getShortMessage());
 	}
 
 	@Test
@@ -80,7 +81,8 @@ public class LogLineAccumulatorTest {
 		assertEquals("11:23:40,431", logLineUI.getTimestamp());
 		assertEquals("INFO", logLineUI.getSeverity());
 		assertEquals("AbstractJBossASServerBase", logLineUI.getReporter());
-		assertEquals("Server Configuration:", logLineUI.getShortMessage());
+		assertEquals("Server Configuration", logLineUI.getShortMessage());
+		assertEquals("Server Configuration:", logLineUI.getFirstLine());
 	}
 
 	@Test
@@ -170,7 +172,8 @@ public class LogLineAccumulatorTest {
 		for (String s : lines) {
 			logLineUI = logLineAccumulator.addLine(s);
 		}
-		assertEquals("InvocationTargetException occurred, root cause: Error updating object [com.example.package.MyBean@56930e80]: Unable to add object of class [com.example.package.MyBean]: com.example.package.exception.ExampleException: Error updating object [com.example.package.MyBean@56930e80]: Unable to add object of class [com.example.package.MyBean]", logLineUI.getShortMessage());
+		assertEquals("InvocationTargetException occurred, root cause: Error updating object [com.example.package.MyBean@56930e80]: Unable to add object of class [com.example.package.MyBean]: com.example.package.exception.ExampleException: Error updating object [com.example.package.MyBean@56930e80]: Unable to add object of class [com.example.package.MyBean]", logLineUI.getFirstLine());
+		assertEquals("Unable to add object of class [com.example.package.MyBean]", logLineUI.getShortMessage());
 		assertThat(logLineUI.getStackTraceElements(), new NonExhaustiveListMatcher(
 				expectedStackTraceElement(
 				"at com.example.package.util.PersistenceUtil.createObject(PersistenceUtil.java:277) [:]",

@@ -15,6 +15,7 @@ public abstract class BaseLogEntry {
 	private final ObservableList<StackTraceElementUI> stackTraceElements = FXCollections.observableArrayList();
 	/**
 	 * Actual message extracted from the first line.
+	 * If the line contains a colon, this will be whatever follows it, as long as it's not blank.
 	 */
 	private String shortMessage;
 

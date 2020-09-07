@@ -36,6 +36,12 @@ public class LogLineUI extends BaseLogEntry {
 	 */
 	private String executor;
 
+	/**
+	 * Actual message extracted from the first line.
+	 * Unlike shortMessage this contains all the message regardless if there are colons or not.
+	 */
+	private String firstLine;
+
 	private final ObservableList<CausalSectionUI> causalStackTraceSections = FXCollections.observableArrayList();
 
 	public String getPlainText() {
@@ -46,9 +52,17 @@ public class LogLineUI extends BaseLogEntry {
 		String fullText = current.toString();
 		int firstLineEnding = fullText.indexOf(System.lineSeparator());
 		if (firstLineEnding > 1) {
-			return getShortMessage() + fullText.substring(firstLineEnding);
+			return getFirstLine() + fullText.substring(firstLineEnding);
 		}
 		return getShortMessage();
+	}
+
+	public String getFirstLine() {
+		return firstLine;
+	}
+
+	public void setFirstLine(String firstLine) {
+		this.firstLine = firstLine;
 	}
 
 	public String getTruncated() {

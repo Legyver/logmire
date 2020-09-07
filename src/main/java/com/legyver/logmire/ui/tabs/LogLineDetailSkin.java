@@ -1,27 +1,24 @@
 package com.legyver.logmire.ui.tabs;
 
-import com.legyver.core.exception.CoreException;
-import com.legyver.fenxlib.core.factory.SvgIconFactory;
-import com.legyver.fenxlib.core.factory.decorator.ButtonIconDecorator;
-import com.legyver.fenxlib.core.factory.decorator.ButtonTooltipDecorator;
-import com.legyver.fenxlib.core.factory.options.IconOptions;
 import javafx.beans.property.StringProperty;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
+	private static final Logger logger = LogManager.getLogger(LogLineDetailSkin.class);
 
 	private final GridPane gridPane;
 	public LogLineDetailSkin(LogLineDetail logLineDetail) {
@@ -32,14 +29,17 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 		gridPane.setPadding(new Insets(10));
 
 		try {
-
-			final SvgIconFactory iconFactory = new SvgIconFactory(
-					new IconOptions("file-text-o", "#68b1e3", 20, null));
-
 			Label messageLabel = new Label("Message");
 			Node message = make(new TextArea(), logLineDetail.fullMessageProperty());
-			EventHandler<ActionEvent> onClickCopy = onClickCopy(logLineDetail.copyableMessageProperty());
-			Button copyMessageButton = decorate("Copy top row", iconFactory, onClickCopy);
+			EventHandler<MouseEvent> onClickCopy = onClickCopy(logLineDetail.copyableMessageProperty());
+			SVGControl svgControl = new SVGControl();
+			svgControl.setSvgIcon("file-text-o");
+			svgControl.setSvgIconPaint(Paint.valueOf("#68b1e3"));
+			svgControl.setSvgIconSize(20);
+			Region spacer = new Region();
+			VBox vBox = new VBox(svgControl, spacer);
+			VBox.setVgrow(spacer, Priority.ALWAYS);
+			svgControl.setOnMouseClicked(onClickCopy);
 
 			Label reporterLabel = new Label("Reporter");
 			Node reporter = make(new TextField(), logLineDetail.reporterProperty());
@@ -70,22 +70,16 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 
 			gridPane.add(messageLabel, 0, row);
 			gridPane.add(message, 1, row, 5, 1);
-			gridPane.add(copyMessageButton, 6, row, 1, 1);//copy icon to right of message
-			GridPane.setValignment(copyMessageButton, VPos.TOP);
+			gridPane.add(vBox, 6, row, 1, 1);//copy icon to right of message
+			GridPane.setValignment(vBox, VPos.TOP);
 			GridPane.setHgrow(message, Priority.ALWAYS);
 
-		} catch (CoreException coreException) {
-			boolean breakHere = true;
 		} finally {
 			getChildren().add(gridPane);
 		}
 	}
 
-	private Button decorate(String copyMessage, SvgIconFactory iconFactory, EventHandler<ActionEvent> onClickCopy) throws CoreException {
-		return new ButtonTooltipDecorator(copyMessage, new ButtonIconDecorator(onClickCopy, iconFactory)).makeNode(null);
-	}
-
-	private EventHandler<ActionEvent> onClickCopy(StringProperty property) {
+	private EventHandler<MouseEvent> onClickCopy(StringProperty property) {
 		Clipboard clipboard = Clipboard.getSystemClipboard();
 		return event -> {
 			final ClipboardContent content = new ClipboardContent();

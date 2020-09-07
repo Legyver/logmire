@@ -2,6 +2,7 @@ package com.legyver.logmire.task.openlog;
 
 import com.legyver.logmire.ui.bean.CausalSectionUI;
 import com.legyver.logmire.ui.bean.LogLineUI;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -156,7 +157,22 @@ public class LogLineAccumulator {
 
 			@Override
 			void setValue(LogLineUI logLineUI, String value) {
-				logLineUI.setShortMessage(value);
+				logLineUI.setFirstLine(value);
+				if (value != null && value.contains(":")) {
+					String[] parts = value.split(":");
+					for (int i = parts.length - 1; i > -1; i--) {
+						String part = parts[i];
+						if (!StringUtils.isAllBlank(part)) {
+							logLineUI.setShortMessage(part.trim());
+							break;
+						}
+					}
+					if (logLineUI.getShortMessage() == null) {
+						logLineUI.setShortMessage(value);
+					}
+				} else {
+					logLineUI.setShortMessage(value);
+				}
 			}
 		}, REPORTER(MESSAGE_REGEX, 1) {
 			@Override
