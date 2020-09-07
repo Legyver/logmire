@@ -5,7 +5,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
@@ -69,12 +68,6 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 
 			Label causesLabel = new Label("Errors");
 			Label label = new Label(logLineDetail.getCopyableMessage());
-			label.setOnMouseClicked(new EventHandler<MouseEvent>() {
-				@Override
-				public void handle(MouseEvent mouseEvent) {
-					logger.debug("moused clicked");
-				}
-			});
 			TreeItem causesRoot = new TreeItem<>(label);
 			TreeView causesTree = new TreeView<>(causesRoot);
 			causesTree.setShowRoot(false);
