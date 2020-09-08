@@ -1,5 +1,6 @@
 package com.legyver.logmire.ui.tabs;
 
+import com.legyver.fenxlib.core.factory.SvgIconFactory;
 import com.legyver.logmire.ui.bean.CausalSectionUI;
 import com.legyver.logmire.ui.bean.DataSourceUI;
 import com.legyver.logmire.ui.bean.LogLineUI;
@@ -7,11 +8,15 @@ import com.legyver.logmire.ui.bean.StackTraceElementUI;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SkinBase;
-import javafx.scene.control.SplitPane;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,8 +31,13 @@ public class LogViewSkin extends SkinBase<LogView> {
 	public LogViewSkin(LogView logView) {
 		super(logView);
 		logs = new ListView<>();
+
+		BorderPane logPane = new BorderPane();
+		logPane.setTop(filterControl(logView));
+		logPane.setCenter(logs);
+
 		detailPane = new AnchorPane();
-		mainSplitPane = new SplitPane(logs, detailPane);
+		mainSplitPane = new SplitPane(logPane, detailPane);
 
 		logLineDetail = new LogLineDetail();
 		logLineDetail.setVisible(false);
@@ -41,6 +51,53 @@ public class LogViewSkin extends SkinBase<LogView> {
 		initLogs(logView);
 
 		getChildren().add(mainSplitPane);
+	}
+
+	private Node filterControl(LogView logView) {
+		CheckBox checkBoxInternals = new CheckBox("Hide Internals");
+		Group checkboxGroup = new Group(checkBoxInternals);
+
+		TextField searchField = new TextField();
+		searchField.setPrefWidth(300);
+		searchField.setMaxWidth(600);
+		SVGControl searchControl = new SVGControl();
+		searchControl.setSvgIcon("search");
+		searchControl.setSvgIconPaint(Paint.valueOf("#68b1e3"));
+		searchControl.setSvgIconSize(15);
+		searchControl.setTooltip(new Tooltip("Search"));
+
+		ToggleControl toggleTrace = new ToggleControl("TRACE");
+		ToggleControl debugTrace = new ToggleControl("DEBUG");
+		ToggleControl infoTrace = new ToggleControl("INFO");
+		ToggleControl warningTrace = new ToggleControl("WARN");
+		ToggleControl errorTrace = new ToggleControl("ERROR");
+		ToggleControl fatalTrace = new ToggleControl("FATAL");
+
+		Label hideLabel = new Label("Hide");
+		hideLabel.getStyleClass().add("log-menu-bar");
+		VBox hideOptions = new VBox(hideLabel, checkboxGroup);
+
+		Label searchLabel = new Label("Search");
+		searchLabel.getStyleClass().add("log-menu-bar");
+		HBox searchBox = new HBox(searchField, searchControl);
+		searchBox.setSpacing(4);
+		HBox.setHgrow(searchBox, Priority.SOMETIMES);
+
+		VBox searchOptions = new VBox(searchLabel, searchBox);
+
+
+		Label severityLabel = new Label("Severity");
+		severityLabel.getStyleClass().add("log-menu-bar");
+		HBox severityFilterBox = new HBox(toggleTrace, debugTrace, infoTrace, warningTrace, errorTrace, fatalTrace);
+		HBox.setHgrow(severityFilterBox, Priority.NEVER);
+		VBox severityOptions = new VBox(severityLabel, severityFilterBox);
+
+		HBox hbox = new HBox(hideOptions, new Separator(Orientation.VERTICAL), searchOptions, new Separator(Orientation.VERTICAL), severityOptions);
+		hbox.setPadding(new Insets(10));
+		hbox.setSpacing(5);
+		HBox.setHgrow(searchOptions, Priority.SOMETIMES);
+
+		return hbox;
 	}
 
 	private void initFocusLogListener(LogView logView) {
