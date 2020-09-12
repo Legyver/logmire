@@ -10,9 +10,7 @@ import com.legyver.fenxlib.core.factory.menu.file.RecentlyOpenedFileFactory;
 import com.legyver.fenxlib.core.factory.options.BorderPaneInitializationOptions;
 import com.legyver.fenxlib.core.factory.options.RegionInitializationOptions;
 import com.legyver.fenxlib.core.locator.query.ComponentQuery;
-import com.legyver.fenxlib.core.uimodel.FileOptions;
 import com.legyver.fenxlib.core.widget.about.AboutMenuItemFactory;
-import com.legyver.fenxlib.core.widget.about.AboutPageOptions;
 import com.legyver.logmire.config.ApplicationOptionsBuilder;
 import com.legyver.logmire.config.BindingFactory;
 import com.legyver.logmire.config.LogmireConfig;
@@ -62,7 +60,10 @@ public class MainApplication extends Application  {
 
 			ApplicationUIModel uiModel = (ApplicationUIModel) ApplicationContext.getUiModel();
 			LogmireConfig applicationConfig = (LogmireConfig) ApplicationContext.getApplicationConfig();
+
+
 			LogmireVersionInfo logmireVersionInfo = new LogmireVersionInfo();
+
 
 			Supplier<StackPane> centerContentReference = () -> {
 				Optional<StackPane> center = new ComponentQuery.QueryBuilder()
@@ -75,7 +76,7 @@ public class MainApplication extends Application  {
 
 			TaskFactory taskFactory = new TaskFactory();
 
-			OpenLogfileProcessor importProcessor = new OpenLogfileProcessor(taskFactory, bindingFactory, applicationConfig, logmireVersionInfo.getBuildProperties());
+			OpenLogfileProcessor importProcessor = new OpenLogfileProcessor(taskFactory, bindingFactory);
 
 			Consumer<File> fileSelectionConsumer = file -> {
 				Optional<DataSourceUI> preexistingDataSource = uiModel.getOpenSources().stream()

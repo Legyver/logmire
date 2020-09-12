@@ -1,7 +1,6 @@
 package com.legyver.logmire.task.openlog;
 
 import com.legyver.logmire.config.BindingFactory;
-import com.legyver.logmire.config.LogmireConfig;
 import com.legyver.logmire.task.TaskFactory;
 import com.legyver.logmire.ui.bean.DataSourceUI;
 import org.apache.logging.log4j.LogManager;
@@ -14,21 +13,16 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchService;
-import java.util.Properties;
 
 public class OpenLogfileProcessor {
 	private static final Logger logger = LogManager.getLogger(OpenLogfileProcessor.class);
 
 	private final TaskFactory taskFactory;
 	private final BindingFactory bindingFactory;
-	private final LogmireConfig applicationConfig;
-	private final Properties buildProperties;
 
-	public OpenLogfileProcessor(TaskFactory taskFactory, BindingFactory bindingFactory, LogmireConfig applicationConfig, Properties buildProperties) {
+	public OpenLogfileProcessor(TaskFactory taskFactory, BindingFactory bindingFactory) {
 		this.taskFactory = taskFactory;
 		this.bindingFactory = bindingFactory;
-		this.applicationConfig = applicationConfig;
-		this.buildProperties = buildProperties;
 	}
 
 	public DataSourceUI onNewLogfileSelected(File logFile) {

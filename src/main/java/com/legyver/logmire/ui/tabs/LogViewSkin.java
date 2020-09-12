@@ -1,12 +1,15 @@
 package com.legyver.logmire.ui.tabs;
 
-import com.legyver.fenxlib.core.factory.SvgIconFactory;
+import com.legyver.fenxlib.core.context.ApplicationContext;
+import com.legyver.logmire.ui.ApplicationUIModel;
 import com.legyver.logmire.ui.bean.CausalSectionUI;
 import com.legyver.logmire.ui.bean.DataSourceUI;
 import com.legyver.logmire.ui.bean.LogLineUI;
 import com.legyver.logmire.ui.bean.StackTraceElementUI;
+import javafx.beans.property.BooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -16,21 +19,24 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Optional;
 
 public class LogViewSkin extends SkinBase<LogView> {
 	private static final Logger logger  = LogManager.getLogger(LogViewSkin.class);
 
 	private final SplitPane mainSplitPane;
 	private final ListView<LogLine> logs;
+	private final ObservableList<LogLine> internalList;
 	private final AnchorPane detailPane;
 	private final LogLineDetail logLineDetail;
 
 	public LogViewSkin(LogView logView) {
 		super(logView);
 		logs = new ListView<>();
+		internalList = logs.getItems();
 
 		BorderPane logPane = new BorderPane();
 		logPane.setTop(filterControl(logView));
@@ -48,7 +54,7 @@ public class LogViewSkin extends SkinBase<LogView> {
 		AnchorPane.setBottomAnchor(logLineDetail, 0.0);
 
 		initFocusLogListener(logView);
-		initLogs(logView);
+		initLogs(logView, true);
 
 		getChildren().add(mainSplitPane);
 	}
@@ -66,12 +72,12 @@ public class LogViewSkin extends SkinBase<LogView> {
 		searchControl.setSvgIconSize(15);
 		searchControl.setTooltip(new Tooltip("Search"));
 
-		ToggleControl toggleTrace = new ToggleControl("TRACE");
-		ToggleControl debugTrace = new ToggleControl("DEBUG");
-		ToggleControl infoTrace = new ToggleControl("INFO");
-		ToggleControl warningTrace = new ToggleControl("WARN");
-		ToggleControl errorTrace = new ToggleControl("ERROR");
-		ToggleControl fatalTrace = new ToggleControl("FATAL");
+		ToggleControl toggleTrace = makeToggle("TRACE", logView.showTraceProperty());
+		ToggleControl debugTrace = makeToggle("DEBUG", logView.showDebugProperty());
+		ToggleControl infoTrace = makeToggle("INFO", logView.showInfoProperty());
+		ToggleControl warningTrace = makeToggle("WARN", logView.showWarnProperty());
+		ToggleControl errorTrace = makeToggle("ERROR", logView.showErrorProperty());
+		ToggleControl fatalTrace = makeToggle("FATAL", logView.showFatalProperty());
 
 		Label hideLabel = new Label("Hide");
 		hideLabel.getStyleClass().add("log-menu-bar");
@@ -98,6 +104,15 @@ public class LogViewSkin extends SkinBase<LogView> {
 		HBox.setHgrow(searchOptions, Priority.SOMETIMES);
 
 		return hbox;
+	}
+
+	private ToggleControl makeToggle(String text, BooleanProperty booleanProperty) {
+		ToggleControl toggleControl = new ToggleControl(text);
+		boolean currentValue = booleanProperty.getValue();
+		booleanProperty.bind(toggleControl.engagedProperty());
+		toggleControl.setEngaged(currentValue);
+		toggleControl.engagedProperty().addListener((observableValue, oldValue, newValue) -> initLogs(getSkinnable(), false));
+		return toggleControl;
 	}
 
 	private void initFocusLogListener(LogView logView) {
@@ -145,23 +160,28 @@ public class LogViewSkin extends SkinBase<LogView> {
 
 	}
 
-	private void initLogs(LogView logView) {
+	private void initLogs(LogView logView, boolean init) {
 		DataSourceUI dataSourceUI = logView.getDataSourceUI();
 		ObservableList<LogLineUI> logLines = dataSourceUI.getLines();
 
 		dataSourceUI.acquireLock();
-		logLines.addListener((ListChangeListener<LogLineUI>) change -> {
-			if (change.next()) {
-				if (change.wasAdded()) {
-					for (LogLineUI added : change.getAddedSubList()) {
-						addLine(logView, added);
+		if (init) {
+			logLines.addListener((ListChangeListener<LogLineUI>) change -> {
+				if (change.next()) {
+					if (change.wasAdded()) {
+						for (LogLineUI added : change.getAddedSubList()) {
+							addLine(logView, added);
+						}
+					} else {
+						//assume file was rolled-over
+						logs.getItems().clear();
 					}
-				} else {
-					//assume file was rolled-over
-					logs.getItems().clear();
 				}
-			};
-		});
+				;
+			});
+		} else {
+			logs.getItems().clear();
+		}
 		logLines.stream().forEach(logLineUI -> {
 			addLine(logView, logLineUI);
 		});
@@ -169,10 +189,35 @@ public class LogViewSkin extends SkinBase<LogView> {
 	}
 
 	private void addLine(LogView logView, LogLineUI logLineUI) {
-		LogLine logLine = new LogLine(logLineUI);
-		logs.getItems().add(logLine);
-		logs.getSelectionModel().setSelectionMode(null);
-		logLine.setOnMouseClicked(new SelectableListener(logs.getItems().size() -1 , logLine, logView));
+		if (severityShown(logView, logLineUI.getSeverity())
+			&& !isInternalMessage(logView, logLineUI.getReporter())
+		) {
+			LogLine logLine = new LogLine(logLineUI);
+			logs.getItems().add(logLine);
+			logLine.setOnMouseClicked(new SelectableListener(logs.getItems().size() -1 , logLine, logView));
+		}
+
+	}
+
+	private boolean isInternalMessage(LogView logView, String reporter) {
+		ApplicationUIModel applicationUIModel = (ApplicationUIModel) ApplicationContext.getUiModel();
+		ObservableMap<String, BooleanProperty> packageFilters = applicationUIModel.getPackageFilters();
+		Optional<String> filterPackage = packageFilters.keySet().stream()
+				.filter(s -> reporter != null && reporter.startsWith(s))
+				.findFirst();
+		return filterPackage.isPresent() ? packageFilters.get(filterPackage.get()).get(): false;
+	}
+
+	private boolean severityShown(LogView logView, String severity) {
+		switch (severity) {
+			case "TRACE" : return logView.isShowTrace();
+			case "DEBUG" : return logView.isShowDebug();
+			case "INFO" : return logView.isShowInfo();
+			case "WARN" : return logView.isShowWarn();
+			case "ERROR" : return logView.isShowError();
+			case "FATAL" : return logView.isShowFatal();
+			default: return true;
+		}
 	}
 
 	private class SelectableListener implements EventHandler<MouseEvent> {

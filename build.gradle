@@ -6,7 +6,7 @@ group 'com.legyver.logmire'
 version '1.0-SNAPSHOT'
 
 ext {
-    fenxlibVersion = "2.0.0.0-alpha-1"
+    fenxlibVersion = "2.0.0.0-alpha-2"
     log4jVersion = "2.13.0"
 }
 

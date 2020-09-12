@@ -1,5 +1,8 @@
 package com.legyver.logmire.ui.tabs;
 
+import javafx.beans.Observable;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
 import javafx.scene.control.SkinBase;
 import javafx.scene.input.MouseEvent;
@@ -14,21 +17,18 @@ public class ToggleControlSkin extends SkinBase<ToggleControl> {
 	public static final String DARK_GREY = "#36423d";
 	public static final String GREEN = "00a123";
 
+	private final Circle circle;
+
 	public ToggleControlSkin(ToggleControl toggleControl) {
 		super(toggleControl);
 
-		Circle circle = new Circle(4);
-		circle.setFill(Paint.valueOf(DARK_GREY));
+		circle = new Circle(4);
+		setColor(null, !toggleControl.isEngaged(), toggleControl.isEngaged());
 		toggleControl.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
 			toggleControl.setEngaged(!toggleControl.isEngaged());
-			if (toggleControl.isEngaged()) {
-				circle.setFill(Paint.valueOf(GREEN));
-			} else {
-				circle.setFill(Paint.valueOf(DARK_GREY));
-			}
 			logger.debug(toggleControl.getText() + ": " + (toggleControl.isEngaged() ? "ON" : "OFF"));
 		});
-
+		toggleControl.engagedProperty().addListener(this::setColor);
 
 		Label label = new Label();
 		label.textProperty().bind(toggleControl.textProperty());
@@ -36,4 +36,13 @@ public class ToggleControlSkin extends SkinBase<ToggleControl> {
 		HBox hBox = new HBox(circle, label);
 		getChildren().add(hBox);
 	}
+
+	private void setColor(ObservableValue observableValue, Boolean oldValue, Boolean newValue) {
+		if (newValue) {
+			circle.setFill(Paint.valueOf(GREEN));
+		} else {
+			circle.setFill(Paint.valueOf(DARK_GREY));
+		}
+	}
+
 }
