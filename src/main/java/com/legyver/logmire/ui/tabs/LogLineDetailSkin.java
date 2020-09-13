@@ -67,7 +67,8 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 			Node rootLocation = make(new TextField(), logLineDetail.rootLocationProperty());
 
 			Label causesLabel = new Label("Errors");
-			Label label = new Label(logLineDetail.getCopyableMessage());
+			Label label = new Label();
+			label.textProperty().bind(logLineDetail.copyableMessageProperty());
 			TreeItem causesRoot = new TreeItem<>(label);
 			TreeView causesTree = new TreeView<>(causesRoot);
 			causesTree.setShowRoot(false);
@@ -80,6 +81,8 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 							TreeItem currentLast = findLast(causesRoot);
 							addToTree(currentLast, addedList, 0);
 						});
+					} else if (change.wasRemoved()) {
+						causesRoot.getChildren().clear();
 					}
 				}
 			});

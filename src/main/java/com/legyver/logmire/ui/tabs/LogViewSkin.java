@@ -141,6 +141,8 @@ public class LogViewSkin extends SkinBase<LogView> {
 				logLineDetail.setTimestamp(newValue.getTimestamp());
 				logLineDetail.setRootError(newValue.getRootError());
 				logLineDetail.setRootLocation(newValue.getRootLocation());
+				logLineDetail.getStackTraceElements().clear();
+				logLineDetail.getCausalSections().clear();
 
 				newValue.acquireLock();
 				newValue.getStackTraceElements().stream().forEach(stackTraceElementUI -> logLineDetail.getStackTraceElements().add(stackTraceElementUI));
