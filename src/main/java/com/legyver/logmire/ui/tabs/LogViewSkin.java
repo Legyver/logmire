@@ -7,13 +7,14 @@ import com.legyver.logmire.ui.bean.DataSourceUI;
 import com.legyver.logmire.ui.bean.LogLineUI;
 import com.legyver.logmire.ui.bean.StackTraceElementUI;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
@@ -60,9 +61,18 @@ public class LogViewSkin extends SkinBase<LogView> {
 	}
 
 	private Node filterControl(LogView logView) {
-		CheckBox checkBoxInternals = new CheckBox("Hide Internals");
-		Group checkboxGroup = new Group(checkBoxInternals);
-
+		PackageFilter packageFilter = new PackageFilter();
+		packageFilter.setTooltip(new Tooltip("Hide internal packages"));
+		packageFilter.hidePackageProperty().addListener((observableValue, oldValue, newValue) -> initLogs(logView, false));
+		ApplicationUIModel applicationUIModel = (ApplicationUIModel) ApplicationContext.getUiModel();
+		ObservableMap<String, BooleanProperty> packageFilters = applicationUIModel.getPackageFilters();
+		packageFilters.entrySet().stream().forEach(entry -> {
+			entry.getValue().addListener((observableValue, aBoolean, t1) -> {
+				if (packageFilter.isHidePackage()) {
+					initLogs(logView, false);
+				}
+			});
+		});
 		TextField searchField = new TextField();
 		searchField.setPrefWidth(300);
 		searchField.setMaxWidth(600);
@@ -81,7 +91,7 @@ public class LogViewSkin extends SkinBase<LogView> {
 
 		Label hideLabel = new Label("Hide");
 		hideLabel.getStyleClass().add("log-menu-bar");
-		VBox hideOptions = new VBox(hideLabel, checkboxGroup);
+		VBox hideOptions = new VBox(hideLabel, packageFilter);
 
 		Label searchLabel = new Label("Search");
 		searchLabel.getStyleClass().add("log-menu-bar");
@@ -180,6 +190,7 @@ public class LogViewSkin extends SkinBase<LogView> {
 				;
 			});
 		} else {
+			//rather than filtering the items, we actually re-add items every time, so we need to clear existing first
 			logs.getItems().clear();
 		}
 		logLines.stream().forEach(logLineUI -> {

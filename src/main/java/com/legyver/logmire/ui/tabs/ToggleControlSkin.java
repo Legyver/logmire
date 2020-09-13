@@ -1,7 +1,5 @@
 package com.legyver.logmire.ui.tabs;
 
-import javafx.beans.Observable;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
 import javafx.scene.control.SkinBase;
@@ -15,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 public class ToggleControlSkin extends SkinBase<ToggleControl> {
 	private static final Logger logger = LogManager.getLogger();
 	public static final String DARK_GREY = "#36423d";
-	public static final String GREEN = "00a123";
+	public static final String GREEN = "#00a123";
 
 	private final Circle circle;
 

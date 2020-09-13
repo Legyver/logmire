@@ -2,6 +2,7 @@ package com.legyver.logmire.config;
 
 import com.legyver.fenxlib.core.config.options.ApplicationOptions;
 import com.legyver.fenxlib.core.config.options.init.PreShutdownConfigSyncLifecycleHook;
+import com.legyver.fenxlib.core.config.options.init.SVGGlyphLoadingApplicationLifecycleHook;
 import com.legyver.fenxlib.core.config.options.init.UiModelConfigInitializer;
 import com.legyver.fenxlib.core.context.ApplicationContext;
 import com.legyver.fenxlib.extensions.tuktukfx.config.TaskLifecycleMixin;
@@ -13,6 +14,9 @@ import javafx.collections.ObservableMap;
 import java.util.stream.Collectors;
 
 public class ApplicationOptionsBuilder extends ApplicationOptions.Builder<ApplicationOptionsBuilder> implements TaskLifecycleMixin {
+
+	public static final String FONTAWESOME_FREE_REGULAR = "fa-free-regular";
+	public static final String FONTAWESOME_FREE_SOLID = "fa-free-solid";
 
 	public ApplicationOptionsBuilder() {
 		super();
@@ -30,6 +34,8 @@ public class ApplicationOptionsBuilder extends ApplicationOptions.Builder<Applic
 				syncSeverityFiltersToConfig(applicationConfig, applicationUIModel);
 			}
 		});
+		registerLifecycleHook(new SVGGlyphLoadingApplicationLifecycleHook(FONTAWESOME_FREE_REGULAR, "/fonts/fa-free-regular.svg"));
+		registerLifecycleHook(new SVGGlyphLoadingApplicationLifecycleHook(FONTAWESOME_FREE_SOLID, "/fonts/fa-free-solid.svg"));
 		registerLifecycleHook(new UiModelConfigInitializer<LogmireConfig, ApplicationUIModel>() {
 			@Override
 			protected void syncToUiModel(LogmireConfig applicationConfig, ApplicationUIModel uiModel) {
