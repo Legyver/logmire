@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 /**
  * Create abbreviations for show/hide package labels
+ * The idea was to split out individual icons for each filter.  This may no longer be needed as having a unified icon seems cleaner.
  */
 public enum PackageAbbreviator {
 	INSTANCE;

@@ -7,8 +7,6 @@ import com.legyver.logmire.ui.bean.DataSourceUI;
 import com.legyver.logmire.ui.bean.LogLineUI;
 import com.legyver.logmire.ui.bean.StackTraceElementUI;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
