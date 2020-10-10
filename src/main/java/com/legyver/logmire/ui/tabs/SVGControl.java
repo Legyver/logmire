@@ -1,5 +1,6 @@
 package com.legyver.logmire.ui.tabs;
 
+import com.legyver.logmire.config.IconConstants;
 import javafx.beans.property.*;
 import javafx.scene.control.Control;
 import javafx.scene.control.Skin;
@@ -7,12 +8,25 @@ import javafx.scene.paint.Paint;
 
 public class SVGControl extends Control {
 	private final ObjectProperty<Paint> svgIconPaint = new SimpleObjectProperty<>();
+	private final StringProperty svgIconLibraryPrefix = new SimpleStringProperty(IconConstants.FONTAWESOME_FREE_REGULAR);
 	private final StringProperty svgIcon = new SimpleStringProperty();
 	private final LongProperty svgIconSize = new SimpleLongProperty(20L);
 
 	public SVGControl() {
 		getStyleClass().add("svg-button");
 		setFocusTraversable(true);
+	}
+
+	public String getSvgIconLibraryPrefix() {
+		return svgIconLibraryPrefix.get();
+	}
+
+	public StringProperty svgIconLibraryPrefixProperty() {
+		return svgIconLibraryPrefix;
+	}
+
+	public void setSvgIconLibraryPrefix(String svgIconLibraryPrefix) {
+		this.svgIconLibraryPrefix.set(svgIconLibraryPrefix);
 	}
 
 	public String getSvgIcon() {

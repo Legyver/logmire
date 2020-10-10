@@ -13,10 +13,9 @@ import javafx.collections.ObservableMap;
 
 import java.util.stream.Collectors;
 
-public class ApplicationOptionsBuilder extends ApplicationOptions.Builder<ApplicationOptionsBuilder> implements TaskLifecycleMixin {
+public class ApplicationOptionsBuilder extends ApplicationOptions.Builder<ApplicationOptionsBuilder> implements TaskLifecycleMixin, IconConstants {
 
-	public static final String FONTAWESOME_FREE_REGULAR = "fa-free-regular";
-	public static final String FONTAWESOME_FREE_SOLID = "fa-free-solid";
+
 
 	public ApplicationOptionsBuilder() {
 		super();

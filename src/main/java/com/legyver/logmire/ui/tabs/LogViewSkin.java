@@ -1,6 +1,7 @@
 package com.legyver.logmire.ui.tabs;
 
 import com.legyver.fenxlib.core.context.ApplicationContext;
+import com.legyver.logmire.config.IconConstants;
 import com.legyver.logmire.ui.ApplicationUIModel;
 import com.legyver.logmire.ui.bean.CausalSectionUI;
 import com.legyver.logmire.ui.bean.DataSourceUI;
@@ -8,6 +9,7 @@ import com.legyver.logmire.ui.bean.LogLineUI;
 import com.legyver.logmire.ui.bean.StackTraceElementUI;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ListChangeListener;
+import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.event.EventHandler;
@@ -71,12 +73,26 @@ public class LogViewSkin extends SkinBase<LogView> {
 				}
 			});
 		});
+		packageFilters.addListener((MapChangeListener<String, BooleanProperty>) change -> {
+			String packageName = null;
+			BooleanProperty enabled = null;
+			if (change.wasAdded()) {
+				packageName = change.getKey();
+				enabled = change.getValueAdded();
+			} else if (change.wasRemoved()) {
+				packageName = change.getKey();
+				enabled = change.getValueAdded();
+			}
+			initLogs(logView, false);
+		});
 		TextField searchField = new TextField();
 		searchField.setPrefWidth(300);
 		searchField.setMaxWidth(600);
 		SVGControl searchControl = new SVGControl();
+		searchControl.setSvgIconLibraryPrefix(IconConstants.FONTAWESOME_FREE_SOLID);
 		searchControl.setSvgIcon("search");
 		searchControl.setSvgIconPaint(Paint.valueOf("#68b1e3"));
+//		searchControl.setSvgIconPaint(Paint.valueOf("#36423d"));
 		searchControl.setSvgIconSize(15);
 		searchControl.setTooltip(new Tooltip("Search"));
 
@@ -220,14 +236,25 @@ public class LogViewSkin extends SkinBase<LogView> {
 	}
 
 	private boolean severityShown(LogView logView, String severity) {
-		switch (severity) {
-			case "TRACE" : return logView.isShowTrace();
-			case "DEBUG" : return logView.isShowDebug();
-			case "INFO" : return logView.isShowInfo();
-			case "WARN" : return logView.isShowWarn();
-			case "ERROR" : return logView.isShowError();
-			case "FATAL" : return logView.isShowFatal();
-			default: return true;
+		if (severity == null) {
+			return true;
+		} else {
+			switch (severity) {
+				case "TRACE":
+					return logView.isShowTrace();
+				case "DEBUG":
+					return logView.isShowDebug();
+				case "INFO":
+					return logView.isShowInfo();
+				case "WARN":
+					return logView.isShowWarn();
+				case "ERROR":
+					return logView.isShowError();
+				case "FATAL":
+					return logView.isShowFatal();
+				default:
+					return true;
+			}
 		}
 	}
 

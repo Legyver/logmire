@@ -3,7 +3,6 @@ package com.legyver.logmire.ui.tabs;
 import com.jfoenix.svg.SVGGlyph;
 import com.jfoenix.svg.SVGGlyphLoader;
 import com.legyver.fenxlib.core.context.ApplicationContext;
-import com.legyver.logmire.config.ApplicationOptionsBuilder;
 import com.legyver.logmire.ui.ApplicationUIModel;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -15,6 +14,8 @@ import javafx.scene.paint.Paint;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static com.legyver.logmire.config.IconConstants.*;
+
 public class PackageFilterSkin extends SkinBase<PackageFilter> {
 	private static final Logger logger = LogManager.getLogger(PackageFilterSkin.class);
 	public static final String DARK_GREY = "#36423d";
@@ -23,7 +24,7 @@ public class PackageFilterSkin extends SkinBase<PackageFilter> {
 
 	public PackageFilterSkin(PackageFilter packageFilter) {
 		super(packageFilter);
-		showHide = loadIcon(ApplicationOptionsBuilder.FONTAWESOME_FREE_REGULAR, "eye-slash");
+		showHide = loadIcon(FONTAWESOME_FREE_REGULAR, FONTAWESOME_ICON_EYESLASH);
 		showHide.setSize(20);
 		setColor(null, !packageFilter.isHidePackage(), packageFilter.isHidePackage());
 		packageFilter.hidePackageProperty().addListener(this::setColor);
@@ -33,7 +34,7 @@ public class PackageFilterSkin extends SkinBase<PackageFilter> {
 		ApplicationUIModel applicationUIModel = (ApplicationUIModel) ApplicationContext.getUiModel();
 		applicationUIModel.getPackageFilters().entrySet().stream().forEach(e-> {
 			BooleanProperty hideProperty = e.getValue();
-			SVGGlyph checkmark = loadIcon(ApplicationOptionsBuilder.FONTAWESOME_FREE_SOLID, "check");
+			SVGGlyph checkmark = loadIcon(FONTAWESOME_FREE_SOLID, FONTAWESOME_ICON_CHECK);
 			checkmark.setSize(9);
 			checkmark.setFill(Paint.valueOf(DARK_GREY));
 			checkmark.visibleProperty().bind(hideProperty);
@@ -54,7 +55,7 @@ public class PackageFilterSkin extends SkinBase<PackageFilter> {
 
 	private SVGGlyph loadIcon(String prefix, String iconName) {
 		try {
-			return SVGGlyphLoader.getIcoMoonGlyph(prefix + "." + iconName);
+			return SVGGlyphLoader.getGlyph(prefix + "." + iconName);
 		} catch (Exception exception) {
 			logger.error("Error loading " + prefix + " icon: " + iconName, exception);
 		}

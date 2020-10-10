@@ -3,6 +3,7 @@ package com.legyver.logmire.ui.tabs;
 import com.jfoenix.svg.SVGGlyph;
 import com.jfoenix.svg.SVGGlyphLoader;
 import javafx.scene.control.SkinBase;
+import javafx.scene.layout.Background;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,13 +14,14 @@ public class SVGControlSkin extends SkinBase<SVGControl> {
 
 	public SVGControlSkin(SVGControl svgControl) {
 		super(svgControl);
-
+		String name = svgControl.getSvgIconLibraryPrefix() + "." + svgControl.getSvgIcon();
 		try {
-			glyph = SVGGlyphLoader.getIcoMoonGlyph("icomoon.svg" + "." + svgControl.getSvgIcon());
+			glyph = SVGGlyphLoader.getIcoMoonGlyph(name);
 			glyph.setFill(svgControl.getSvgIconPaint());
 			glyph.setSize(svgControl.getSvgIconSize());
+//			glyph.setBackground(Background.EMPTY);
 		} catch (Exception exception) {
-			logger.error("Error loading control: " + svgControl.getSvgIcon(), exception);
+			logger.error("Error loading control: " + name, exception);
 		}
 
 		getChildren().add(glyph);

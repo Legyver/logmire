@@ -1,6 +1,10 @@
 package com.legyver.logmire.ui.tabs;
 
+import com.legyver.fenxlib.core.context.ApplicationContext;
+import com.legyver.logmire.ui.ApplicationUIModel;
 import com.legyver.logmire.ui.bean.CausalSectionUI;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -23,7 +27,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.legyver.logmire.config.IconConstants.FONTAWESOME_ICON_COPY;
+import static com.legyver.logmire.config.IconConstants.FONTAWESOME_ICON_EYESLASH;
 
 public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 	private static final Logger logger = LogManager.getLogger(LogLineDetailSkin.class);
@@ -118,7 +126,7 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 			row+=3;
 			gridPane.add(stackLabel, 0, row);
 			gridPane.add(stacktrace, 1, row, 5, 4);
-			VBox vBox = copyVBox(onClickCopy(copyableClassRef));
+			VBox vBox = iconVBox(onClickCopy(copyableClassRef), FONTAWESOME_ICON_COPY);
 			gridPane.add(vBox, 6, row);
 			GridPane.setValignment(vBox, VPos.TOP);
 			GridPane.setHgrow(stacktrace, Priority.ALWAYS);
@@ -163,21 +171,30 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 	}
 
 	private void addCopyRow(int row, Label label, Node node, StringProperty copyableProperty) {
+		addIconRow(row, label, node, onClickCopy(copyableProperty), FONTAWESOME_ICON_COPY);
+	}
+
+	private void addSettingsRow(int row, Label label, Node node, StringProperty hideableProperty) {
+		addIconRow(row, label, node, onClickHide(hideableProperty), FONTAWESOME_ICON_EYESLASH);
+	}
+
+	private void addIconRow(int row, Label label, Node node, EventHandler<MouseEvent> onClick, String icon) {
 		gridPane.add(label, 0, row);
 		gridPane.add(node, 1, row, 5, 1);
-		VBox vBox = copyVBox(onClickCopy(copyableProperty));
+		VBox vBox = iconVBox(onClick, icon);
 		gridPane.add(vBox, 6, row, 1, 1);//copy icon to right of message
 		GridPane.setValignment(vBox, VPos.TOP);
 		GridPane.setHgrow(node, Priority.ALWAYS);
 	}
 
-	private VBox copyVBox(EventHandler<MouseEvent> onClickCopy) {
+	private VBox iconVBox(EventHandler<MouseEvent> onClick, String icon) {
 		SVGControl svgControl = new SVGControl();
-		svgControl.setSvgIcon("copy, files-o");
+		svgControl.setSvgIcon(icon);
+//		"cog";
 		svgControl.setSvgIconPaint(Paint.valueOf("#68b1e3"));
-		svgControl.setSvgIconSize(20);
+		svgControl.setSvgIconSize(18);
 
-		svgControl.setOnMouseClicked(onClickCopy);
+		svgControl.setOnMouseClicked(onClick);
 		Region spacer = new Region();
 		VBox vBox = new VBox(svgControl, spacer);
 		VBox.setVgrow(spacer, Priority.ALWAYS);
@@ -190,6 +207,19 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 			final ClipboardContent content = new ClipboardContent();
 			content.putString(property.get());
 			clipboard.setContent(content);
+		};
+	}
+
+	private EventHandler<MouseEvent> onClickHide(StringProperty property) {
+		ApplicationUIModel applicationUIModel = (ApplicationUIModel) ApplicationContext.getUiModel();
+		Map<String, BooleanProperty> packageFilters = applicationUIModel.getPackageFilters();
+		return event -> {
+			BooleanProperty booleanProperty = packageFilters.get(property.get());
+			if (booleanProperty == null) {
+				booleanProperty = new SimpleBooleanProperty(false);
+				packageFilters.put(property.get(), booleanProperty);
+			}
+			booleanProperty.set(!booleanProperty.get());
 		};
 	}
 
