@@ -96,12 +96,12 @@ public class LogViewSkin extends SkinBase<LogView> {
 		searchControl.setSvgIconSize(15);
 		searchControl.setTooltip(new Tooltip("Search"));
 
-		ToggleControl toggleTrace = makeToggle("TRACE", logView.showTraceProperty());
-		ToggleControl debugTrace = makeToggle("DEBUG", logView.showDebugProperty());
-		ToggleControl infoTrace = makeToggle("INFO", logView.showInfoProperty());
-		ToggleControl warningTrace = makeToggle("WARN", logView.showWarnProperty());
-		ToggleControl errorTrace = makeToggle("ERROR", logView.showErrorProperty());
-		ToggleControl fatalTrace = makeToggle("FATAL", logView.showFatalProperty());
+		TextToggleControl toggleTrace = makeToggle("TRACE", logView.showTraceProperty());
+		TextToggleControl debugTrace = makeToggle("DEBUG", logView.showDebugProperty());
+		TextToggleControl infoTrace = makeToggle("INFO", logView.showInfoProperty());
+		TextToggleControl warningTrace = makeToggle("WARN", logView.showWarnProperty());
+		TextToggleControl errorTrace = makeToggle("ERROR", logView.showErrorProperty());
+		TextToggleControl fatalTrace = makeToggle("FATAL", logView.showFatalProperty());
 
 		Label hideLabel = new Label("Hide");
 		hideLabel.getStyleClass().add("log-menu-bar");
@@ -130,12 +130,13 @@ public class LogViewSkin extends SkinBase<LogView> {
 		return hbox;
 	}
 
-	private ToggleControl makeToggle(String text, BooleanProperty booleanProperty) {
-		ToggleControl toggleControl = new ToggleControl(text);
+	private TextToggleControl makeToggle(String text, BooleanProperty booleanProperty) {
+		TextToggleControl toggleControl = new TextToggleControl(text);
+		toggleControl.setPadding(new Insets(1,5,1,5));
 		boolean currentValue = booleanProperty.getValue();
-		booleanProperty.bind(toggleControl.engagedProperty());
-		toggleControl.setEngaged(currentValue);
-		toggleControl.engagedProperty().addListener((observableValue, oldValue, newValue) -> initLogs(getSkinnable(), false));
+		booleanProperty.bind(toggleControl.showLevelProperty());
+		toggleControl.setShowLevel(currentValue);
+		toggleControl.showLevelProperty().addListener((observableValue, oldValue, newValue) -> initLogs(getSkinnable(), false));
 		return toggleControl;
 	}
 

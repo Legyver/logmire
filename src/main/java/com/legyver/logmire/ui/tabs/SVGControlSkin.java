@@ -19,7 +19,6 @@ public class SVGControlSkin extends SkinBase<SVGControl> {
 			glyph = SVGGlyphLoader.getIcoMoonGlyph(name);
 			glyph.setFill(svgControl.getSvgIconPaint());
 			glyph.setSize(svgControl.getSvgIconSize());
-//			glyph.setBackground(Background.EMPTY);
 		} catch (Exception exception) {
 			logger.error("Error loading control: " + name, exception);
 		}
