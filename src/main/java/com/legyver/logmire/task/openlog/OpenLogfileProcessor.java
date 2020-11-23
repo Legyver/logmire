@@ -28,22 +28,18 @@ public class OpenLogfileProcessor {
 	public DataSourceUI onNewLogfileSelected(File logFile) {
 		DataSourceUI dataSource = new DataSourceUI(logFile);
 
-		int lines = 0;
-		int characters = 0;
 		try {
-			WatchService watcher = FileSystems.getDefault().newWatchService();
 			try (BufferedReader in = new BufferedReader(new FileReader(logFile))) {
 				String line;
 				while ((line = in.readLine()) != null) {
-					lines++;
-					characters += line.length() + System.lineSeparator().length();
 					dataSource.addLine(line);
 				}
 			}
+			WatchService watcher = FileSystems.getDefault().newWatchService();
 			logFile.toPath().getParent().register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
 
 		} catch (IOException e) {
-
+			logger.error("Errors reading logfile", e);
 		}
 		bindingFactory.bindNewTab(dataSource);
 

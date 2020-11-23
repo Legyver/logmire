@@ -1,54 +1,32 @@
 package com.legyver.logmire.ui.tabs;
 
-import com.legyver.fenxlib.core.context.ApplicationContext;
-import com.legyver.logmire.ui.ApplicationUIModel;
+import com.legyver.logmire.event.ResetType;
 import com.legyver.logmire.ui.bean.DataSourceUI;
 import com.legyver.logmire.ui.bean.LogLineUI;
+import com.legyver.logmire.ui.filter.PackageFilterData;
+import com.legyver.logmire.ui.filter.SeverityFilterData;
+import com.legyver.logmire.ui.search.FilterableLogContext;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ObservableMap;
 import javafx.scene.control.Control;
 import javafx.scene.control.Skin;
 
 public class LogView extends Control {
 	private final DataSourceUI dataSourceUI;
-	private final ObjectProperty<LogLineUI> focusLogLine = new SimpleObjectProperty<>();
-	//split out the severity properties into individual properties
-	private final BooleanProperty showTrace = new SimpleBooleanProperty();
-	private final BooleanProperty showDebug = new SimpleBooleanProperty();
-	private final BooleanProperty showInfo = new SimpleBooleanProperty();
-	private final BooleanProperty showWarn = new SimpleBooleanProperty();
-	private final BooleanProperty showError = new SimpleBooleanProperty();
-	private final BooleanProperty showFatal = new SimpleBooleanProperty();
+	private final ObjectProperty<LogLineUI> focusLogLine;
+	private final SeverityFilterData severityFilterData;
+	private final PackageFilterData packageFilterData;
 
 	public LogView(DataSourceUI dataSourceUI) {
 		this.dataSourceUI = dataSourceUI;
-		ApplicationUIModel uiModel = (ApplicationUIModel) ApplicationContext.getUiModel();
-		initSeverityFilters(uiModel);
+		this.severityFilterData = dataSourceUI.getFilterableLogContext().getSeverityFilterData();
+		this.packageFilterData = dataSourceUI.getFilterableLogContext().getPackageFilterData();
+		this.focusLogLine = dataSourceUI.getFilterableLogContext().focusLogLineProperty();
 	}
 
-	private void initSeverityFilters(ApplicationUIModel uiModel) {
-		ObservableMap<String, BooleanProperty> severityFilters = uiModel.getSeverityFilters();
-		uiModel.getSeverityFilters().keySet().stream().forEach(severity -> {
-			BooleanProperty applicationProperty = severityFilters.get(severity);
-			boolean currentValue = applicationProperty.getValue();
-			BooleanProperty controlProperty;
-			switch (severity) {
-				case "TRACE": controlProperty = showTrace; break;
-				case "DEBUG": controlProperty = showDebug; break;
-				case "INFO": controlProperty = showInfo; break;
-				case "WARN": controlProperty = showWarn; break;
-				case "ERROR": controlProperty = showError; break;
-				case "FATAL": controlProperty = showFatal; break;
-				default: controlProperty = null;
-			}
-			if (controlProperty != null) {
-				applicationProperty.bind(controlProperty);
-				controlProperty.set(currentValue);//we want the config-loaded value to cascade to the UI, but then the flow should be from UI -> app -> config
-			}
-		});
+	public FilterableLogContext getFilterableLogContext() {
+		return dataSourceUI.getFilterableLogContext();
 	}
 
 	public DataSourceUI getDataSourceUI() {
@@ -67,79 +45,96 @@ public class LogView extends Control {
 		this.focusLogLine.set(focusLogLine);
 	}
 
+	//generated delegate methods
+	public boolean isFilterEnabled() {
+		return packageFilterData.isFilterEnabled();
+	}
+
+	public BooleanProperty filterEnabledProperty() {
+		return packageFilterData.filterEnabledProperty();
+	}
+
+	public void setFilterEnabled(boolean filterEnabled) {
+		packageFilterData.setFilterEnabled(filterEnabled);
+	}
+
 	public boolean isShowTrace() {
-		return showTrace.get();
+		return severityFilterData.isShowTrace();
 	}
 
 	public BooleanProperty showTraceProperty() {
-		return showTrace;
+		return severityFilterData.showTraceProperty();
 	}
 
 	public void setShowTrace(boolean showTrace) {
-		this.showTrace.set(showTrace);
+		severityFilterData.setShowTrace(showTrace);
 	}
 
 	public boolean isShowDebug() {
-		return showDebug.get();
+		return severityFilterData.isShowDebug();
 	}
 
 	public BooleanProperty showDebugProperty() {
-		return showDebug;
+		return severityFilterData.showDebugProperty();
 	}
 
 	public void setShowDebug(boolean showDebug) {
-		this.showDebug.set(showDebug);
+		severityFilterData.setShowDebug(showDebug);
 	}
 
 	public boolean isShowInfo() {
-		return showInfo.get();
+		return severityFilterData.isShowInfo();
 	}
 
 	public BooleanProperty showInfoProperty() {
-		return showInfo;
+		return severityFilterData.showInfoProperty();
 	}
 
 	public void setShowInfo(boolean showInfo) {
-		this.showInfo.set(showInfo);
+		severityFilterData.setShowInfo(showInfo);
 	}
 
 	public boolean isShowWarn() {
-		return showWarn.get();
+		return severityFilterData.isShowWarn();
 	}
 
 	public BooleanProperty showWarnProperty() {
-		return showWarn;
+		return severityFilterData.showWarnProperty();
 	}
 
 	public void setShowWarn(boolean showWarn) {
-		this.showWarn.set(showWarn);
+		severityFilterData.setShowWarn(showWarn);
 	}
 
 	public boolean isShowError() {
-		return showError.get();
+		return severityFilterData.isShowError();
 	}
 
 	public BooleanProperty showErrorProperty() {
-		return showError;
+		return severityFilterData.showErrorProperty();
 	}
 
 	public void setShowError(boolean showError) {
-		this.showError.set(showError);
+		severityFilterData.setShowError(showError);
 	}
 
 	public boolean isShowFatal() {
-		return showFatal.get();
+		return severityFilterData.isShowFatal();
 	}
 
 	public BooleanProperty showFatalProperty() {
-		return showFatal;
+		return severityFilterData.showFatalProperty();
 	}
 
 	public void setShowFatal(boolean showFatal) {
-		this.showFatal.set(showFatal);
+		severityFilterData.setShowFatal(showFatal);
 	}
 
 	public Skin<?> createDefaultSkin() {
 		return new LogViewSkin(this);
+	}
+
+	public void reset(ResetType resetType) {
+		dataSourceUI.getFilterableLogContext().reset(resetType);
 	}
 }

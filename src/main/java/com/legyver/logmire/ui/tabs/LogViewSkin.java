@@ -1,7 +1,10 @@
 package com.legyver.logmire.ui.tabs;
 
 import com.legyver.fenxlib.core.context.ApplicationContext;
-import com.legyver.logmire.config.IconConstants;
+import com.legyver.fenxlib.extensions.tuktukfx.task.adapter.JavaFxAdapter;
+import com.legyver.fenxlib.extensions.tuktukfx.task.exec.TaskExecutor;
+import com.legyver.logmire.event.ResetType;
+import com.legyver.logmire.task.indexlog.IndexTask;
 import com.legyver.logmire.ui.ApplicationUIModel;
 import com.legyver.logmire.ui.bean.CausalSectionUI;
 import com.legyver.logmire.ui.bean.DataSourceUI;
@@ -12,36 +15,35 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Paint;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.stream.Collectors;
 
 public class LogViewSkin extends SkinBase<LogView> {
 	private static final Logger logger  = LogManager.getLogger(LogViewSkin.class);
 
 	private final SplitPane mainSplitPane;
-	private final ListView<LogLine> logs;
-	private final ObservableList<LogLine> internalList;
 	private final AnchorPane detailPane;
+	private final LogList logList;
 	private final LogLineDetail logLineDetail;
 
 	public LogViewSkin(LogView logView) {
 		super(logView);
-		logs = new ListView<>();
-		internalList = logs.getItems();
+		logList = new LogList(logView, logView.getFilterableLogContext());
 
 		BorderPane logPane = new BorderPane();
 		logPane.setTop(filterControl(logView));
-		logPane.setCenter(logs);
+		logPane.setCenter(logList);
 
 		detailPane = new AnchorPane();
 		mainSplitPane = new SplitPane(logPane, detailPane);
@@ -55,53 +57,70 @@ public class LogViewSkin extends SkinBase<LogView> {
 		AnchorPane.setBottomAnchor(logLineDetail, 0.0);
 
 		initFocusLogListener(logView);
-		initLogs(logView, true);
 
+		DataSourceUI dataSourceUI = logView.getDataSourceUI();
+		dataSourceUI.acquireLock();
+		ObservableList<LogLineUI> observableList = dataSourceUI.getLines();
+		//we don't want to lock for the duration of the async task as that defeats the purpose
+		//so create a snapshot
+		List<LogLineUI> listSnapshot = observableList.stream().collect(Collectors.toList());
+		IndexTask indexTask = new IndexTask(logList.getFilterableLogContext(), listSnapshot);
+
+		Semaphore initialIndexLock = new Semaphore(0);
+		JavaFxAdapter mainIndexTaskAdapter = new JavaFxAdapter(indexTask);
+		mainIndexTaskAdapter.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+			@Override
+			public void handle(WorkerStateEvent event) {
+				initialIndexLock.release();
+			}
+		});
+		TaskExecutor.INSTANCE.submitTask(mainIndexTaskAdapter);
+
+		observableList.addListener((ListChangeListener<LogLineUI>) c -> {
+			c.next();
+			if (c.wasAdded()) {
+				List<LogLineUI> added = (List<LogLineUI>) c.getAddedSubList();
+				JavaFxAdapter newLineIndexTask = new JavaFxAdapter(new IndexTask(logList.getFilterableLogContext(), added));
+
+				try {
+					initialIndexLock.acquire();
+					newLineIndexTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+						@Override
+						public void handle(WorkerStateEvent event) {
+							initialIndexLock.release();
+						}
+					});
+					TaskExecutor.INSTANCE.submitTask(mainIndexTaskAdapter);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			} else if (c.wasRemoved()) {
+				//assume that the log file rolled over
+				logView.reset(ResetType.LOGFILE_ROLLOVER);
+			}
+		});
 		getChildren().add(mainSplitPane);
 	}
 
 	private Node filterControl(LogView logView) {
-		PackageFilter packageFilter = new PackageFilter();
-		packageFilter.setTooltip(new Tooltip("Hide internal packages"));
-		packageFilter.hidePackageProperty().addListener((observableValue, oldValue, newValue) -> initLogs(logView, false));
-		ApplicationUIModel applicationUIModel = (ApplicationUIModel) ApplicationContext.getUiModel();
-		ObservableMap<String, BooleanProperty> packageFilters = applicationUIModel.getPackageFilters();
-		packageFilters.entrySet().stream().forEach(entry -> {
-			entry.getValue().addListener((observableValue, aBoolean, t1) -> {
-				if (packageFilter.isHidePackage()) {
-					initLogs(logView, false);
-				}
-			});
-		});
-		packageFilters.addListener((MapChangeListener<String, BooleanProperty>) change -> {
-			String packageName = null;
-			BooleanProperty enabled = null;
-			if (change.wasAdded()) {
-				packageName = change.getKey();
-				enabled = change.getValueAdded();
-			} else if (change.wasRemoved()) {
-				packageName = change.getKey();
-				enabled = change.getValueAdded();
-			}
-			initLogs(logView, false);
-		});
-		TextField searchField = new TextField();
-		searchField.setPrefWidth(300);
-		searchField.setMaxWidth(600);
-		SVGControl searchControl = new SVGControl();
-		searchControl.setSvgIconLibraryPrefix(IconConstants.FONTAWESOME_FREE_SOLID);
-		searchControl.setSvgIcon("search");
-		searchControl.setSvgIconPaint(Paint.valueOf("#68b1e3"));
-//		searchControl.setSvgIconPaint(Paint.valueOf("#36423d"));
-		searchControl.setSvgIconSize(15);
-		searchControl.setTooltip(new Tooltip("Search"));
+		SearchControl searchControl = new SearchControl(logView.getFilterableLogContext());
+		HBox.setHgrow(searchControl, Priority.SOMETIMES);
 
-		TextToggleControl toggleTrace = makeToggle("TRACE", logView.showTraceProperty());
-		TextToggleControl debugTrace = makeToggle("DEBUG", logView.showDebugProperty());
-		TextToggleControl infoTrace = makeToggle("INFO", logView.showInfoProperty());
-		TextToggleControl warningTrace = makeToggle("WARN", logView.showWarnProperty());
-		TextToggleControl errorTrace = makeToggle("ERROR", logView.showErrorProperty());
-		TextToggleControl fatalTrace = makeToggle("FATAL", logView.showFatalProperty());
+		PackageFilter packageFilter = new PackageFilter(logView.getFilterableLogContext());
+		packageFilter.setTooltip(new Tooltip("Hide internal packages"));
+		logView.filterEnabledProperty().bind(packageFilter.hidePackageProperty());
+
+		ApplicationUIModel applicationUIModel = (ApplicationUIModel) ApplicationContext.getUiModel();
+		ObservableMap<String,  BooleanProperty> packageFilters = applicationUIModel.getPackageFilters();
+		packageFilters.entrySet().stream().forEach(entry -> entry.getValue().addListener((observableValue, aBoolean, t1) -> logView.reset(ResetType.PACKAGE_TOGGLE)));
+		packageFilters.addListener((MapChangeListener<String, BooleanProperty>) change -> logView.reset(ResetType.REPORTER_TOGGLE));
+
+		TextToggleControl toggleTrace = filter(makeToggleControl("TRACE", logView.showTraceProperty()));
+		TextToggleControl debugTrace = filter(makeToggleControl("DEBUG", logView.showDebugProperty()));
+		TextToggleControl infoTrace = filter(makeToggleControl("INFO", logView.showInfoProperty()));
+		TextToggleControl warningTrace = filter(makeToggleControl("WARN", logView.showWarnProperty()));
+		TextToggleControl errorTrace = filter(makeToggleControl("ERROR", logView.showErrorProperty()));
+		TextToggleControl fatalTrace = filter(makeToggleControl("FATAL", logView.showFatalProperty()));
 
 		Label hideLabel = new Label("Hide");
 		hideLabel.getStyleClass().add("log-menu-bar");
@@ -109,12 +128,7 @@ public class LogViewSkin extends SkinBase<LogView> {
 
 		Label searchLabel = new Label("Search");
 		searchLabel.getStyleClass().add("log-menu-bar");
-		HBox searchBox = new HBox(searchField, searchControl);
-		searchBox.setSpacing(4);
-		HBox.setHgrow(searchBox, Priority.SOMETIMES);
-
-		VBox searchOptions = new VBox(searchLabel, searchBox);
-
+		VBox searchOptions = new VBox(searchLabel, searchControl);
 
 		Label severityLabel = new Label("Severity");
 		severityLabel.getStyleClass().add("log-menu-bar");
@@ -130,14 +144,18 @@ public class LogViewSkin extends SkinBase<LogView> {
 		return hbox;
 	}
 
-	private TextToggleControl makeToggle(String text, BooleanProperty booleanProperty) {
+	private TextToggleControl makeToggleControl(String text, BooleanProperty booleanProperty) {
 		TextToggleControl toggleControl = new TextToggleControl(text);
 		toggleControl.setPadding(new Insets(1,5,1,5));
 		boolean currentValue = booleanProperty.getValue();
 		booleanProperty.bind(toggleControl.showLevelProperty());
 		toggleControl.setShowLevel(currentValue);
-		toggleControl.showLevelProperty().addListener((observableValue, oldValue, newValue) -> initLogs(getSkinnable(), false));
 		return toggleControl;
+	}
+
+	private TextToggleControl filter(TextToggleControl textToggleControl) {
+		textToggleControl.showLevelProperty().addListener((observableValue, oldValue, newValue) -> getSkinnable().reset(ResetType.SEVERITY_TOGGLE));
+		return textToggleControl;
 	}
 
 	private void initFocusLogListener(LogView logView) {
@@ -187,95 +205,4 @@ public class LogViewSkin extends SkinBase<LogView> {
 
 	}
 
-	private void initLogs(LogView logView, boolean init) {
-		DataSourceUI dataSourceUI = logView.getDataSourceUI();
-		ObservableList<LogLineUI> logLines = dataSourceUI.getLines();
-
-		dataSourceUI.acquireLock();
-		if (init) {
-			logLines.addListener((ListChangeListener<LogLineUI>) change -> {
-				if (change.next()) {
-					if (change.wasAdded()) {
-						for (LogLineUI added : change.getAddedSubList()) {
-							addLine(logView, added);
-						}
-					} else {
-						//assume file was rolled-over
-						logs.getItems().clear();
-					}
-				}
-				;
-			});
-		} else {
-			//rather than filtering the items, we actually re-add items every time, so we need to clear existing first
-			logs.getItems().clear();
-		}
-		logLines.stream().forEach(logLineUI -> {
-			addLine(logView, logLineUI);
-		});
-		dataSourceUI.releaseLock();
-	}
-
-	private void addLine(LogView logView, LogLineUI logLineUI) {
-		if (severityShown(logView, logLineUI.getSeverity())
-			&& !isInternalMessage(logView, logLineUI.getReporter())
-		) {
-			LogLine logLine = new LogLine(logLineUI);
-			logs.getItems().add(logLine);
-			logLine.setOnMouseClicked(new SelectableListener(logs.getItems().size() -1 , logLine, logView));
-		}
-
-	}
-
-	private boolean isInternalMessage(LogView logView, String reporter) {
-		ApplicationUIModel applicationUIModel = (ApplicationUIModel) ApplicationContext.getUiModel();
-		ObservableMap<String, BooleanProperty> packageFilters = applicationUIModel.getPackageFilters();
-		Optional<String> filterPackage = packageFilters.keySet().stream()
-				.filter(s -> reporter != null && reporter.startsWith(s))
-				.findFirst();
-		return filterPackage.isPresent() ? packageFilters.get(filterPackage.get()).get(): false;
-	}
-
-	private boolean severityShown(LogView logView, String severity) {
-		if (severity == null) {
-			return true;
-		} else {
-			switch (severity) {
-				case "TRACE":
-					return logView.isShowTrace();
-				case "DEBUG":
-					return logView.isShowDebug();
-				case "INFO":
-					return logView.isShowInfo();
-				case "WARN":
-					return logView.isShowWarn();
-				case "ERROR":
-					return logView.isShowError();
-				case "FATAL":
-					return logView.isShowFatal();
-				default:
-					return true;
-			}
-		}
-	}
-
-	private class SelectableListener implements EventHandler<MouseEvent> {
-		private final int index;
-		private final LogLine logLine;
-		private final LogView logView;
-
-		private SelectableListener(int index, LogLine logLine, LogView logView) {
-			this.index = index;
-			this.logLine = logLine;
-			this.logView = logView;
-		}
-
-		@Override
-		public void handle(MouseEvent mouseEvent) {
-			logView.setFocusLogLine(logLine.getValue());
-			logs.getSelectionModel().clearSelection();
-			logs.getSelectionModel().select(index);
-//			logs.getFocusModel().focus(index);
-		}
-	}
 }

@@ -12,7 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-public class LogLineAccumulatorTest {
+public class LogLineViewAccumulatorTest {
 	@Test
 	public void parseSingleLineDateTimestampThread() throws Exception {
 		String line = "2020-06-12 11:26:39,428 INFO  [org.apache.coyote.http11.Http11AprProtocol] (Thread-2) Starting Coyote HTTP/1.1 on http-0.0.0.0-8090";

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration name="defaultConfiguration" status="warn" strict="true" monitorInterval="270">
+    <properties>
+        <property name="patternlayout">%d{dd/MM/yyyy HH:mm:ss} %5p %c{1}:%L - %m%n</property>
+    </properties>
+    <appenders>
+        <appender name="Console" type="Console" target="SYSTEM_OUT">
+            <layout type="PatternLayout" pattern="${patternlayout}" />
+        </appender>
+    </appenders>
+    <Loggers>
+        <root level="ERROR">
+            <appender-ref ref="Console" />
+        </root>
+        <Logger name="com.legyver" level="TRACE"/>
+    </Loggers>
+</configuration>

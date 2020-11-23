@@ -17,6 +17,7 @@ public class BindingFactory implements TaskAbortBindingFactory {
 
 	public void bindNewTab(DataSourceUI dataSource) {
 		LogView logView = new LogView(dataSource);
+
 		Tab tab = new Tab(dataSource.getSourceName(), logView);
 		tab.setTooltip(new Tooltip(dataSource.getSourcePath()));
 

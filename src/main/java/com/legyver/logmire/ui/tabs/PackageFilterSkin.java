@@ -3,7 +3,10 @@ package com.legyver.logmire.ui.tabs;
 import com.jfoenix.svg.SVGGlyph;
 import com.jfoenix.svg.SVGGlyphLoader;
 import com.legyver.fenxlib.core.context.ApplicationContext;
+import com.legyver.logmire.event.ResetType;
 import com.legyver.logmire.ui.ApplicationUIModel;
+import com.legyver.logmire.ui.search.FilterableLogContext;
+import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.ContextMenu;
@@ -28,7 +31,7 @@ public class PackageFilterSkin extends SkinBase<PackageFilter> {
 		showHide.setSize(20);
 		setColor(null, !packageFilter.isHidePackage(), packageFilter.isHidePackage());
 		packageFilter.hidePackageProperty().addListener(this::setColor);
-
+		packageFilter.hidePackageProperty().addListener(this::onPackageToggle);
 
 		ContextMenu contextMenu = new ContextMenu();
 		ApplicationUIModel applicationUIModel = (ApplicationUIModel) ApplicationContext.getUiModel();
@@ -53,9 +56,14 @@ public class PackageFilterSkin extends SkinBase<PackageFilter> {
 		getChildren().add(showHide);
 	}
 
+	private void onPackageToggle(ObservableValue observable, Boolean oldValue, Boolean newValue) {
+		FilterableLogContext filterableLogContext = getSkinnable().getFilterableLogContext();
+		filterableLogContext.reset(ResetType.PACKAGE_TOGGLE);
+	}
+
 	private SVGGlyph loadIcon(String prefix, String iconName) {
 		try {
-			return SVGGlyphLoader.getGlyph(prefix + "." + iconName);
+			return SVGGlyphLoader.getIcoMoonGlyph(prefix + "." + iconName);
 		} catch (Exception exception) {
 			logger.error("Error loading " + prefix + " icon: " + iconName, exception);
 		}

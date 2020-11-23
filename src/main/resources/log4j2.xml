@@ -32,9 +32,13 @@
     </appenders>
     <Loggers>
         <root level="ERROR">
-            <appender-ref ref="Console" />
             <appender-ref ref="AsyncFile" />
         </root>
-        <Logger name="com.legyver" level="TRACE"/>
+        <Logger name="com.legyver" level="INFO">
+            <appender-ref ref="Console" />
+        </Logger>
+        <Logger name="com.legyver.logmire.ui.search.InMemoryIndex" level="TRACE">
+            <appender-ref ref="AsyncFile" />
+        </Logger>
     </Loggers>
 </configuration>

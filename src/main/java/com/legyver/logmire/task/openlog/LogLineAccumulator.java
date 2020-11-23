@@ -32,10 +32,11 @@ public class LogLineAccumulator {
 
 	private LogLineUI currentLog;
 	private CausalSectionUI causalSectionUI = null;
+	private int count = 0;
 
 	public LogLineUI addLine(String line) {
 		if (newEntry(line)) {
-			currentLog = new LogLineUI();
+			currentLog = new LogLineUI(++count);
 			currentLog.setTruncated(line.replaceAll("\r\n", "").replaceAll("\n", ""));
 			causalSectionUI = null;
 		} else if (causedBy(line)) {
@@ -47,7 +48,7 @@ public class LogLineAccumulator {
 		}
 		//catch if the logfile starts with something that does not match new line criteria
 		if (currentLog == null) {
-			currentLog = new LogLineUI();
+			currentLog = new LogLineUI(++count);
 		}
 		currentLog.accumulate(line);
 		Stream.of(LogData.values()).forEach(logData -> {

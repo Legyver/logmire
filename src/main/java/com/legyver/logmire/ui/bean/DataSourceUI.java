@@ -1,13 +1,18 @@
 package com.legyver.logmire.ui.bean;
 
 import com.legyver.logmire.task.openlog.LogLineAccumulator;
+import com.legyver.logmire.ui.search.FilterableLogContext;
+import com.legyver.logmire.ui.tabs.LogLineView;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 public class DataSourceUI {
@@ -20,7 +25,10 @@ public class DataSourceUI {
 	private final StringProperty sourcePath = new SimpleStringProperty();
 	private final ObjectProperty<File> source = new SimpleObjectProperty<>();
 	private final ObservableList<LogLineUI> lines = FXCollections.observableArrayList();
+	private final List<LogLineUI> unsynced = new ArrayList<>();
 	private final Semaphore mutex = new Semaphore(1);
+	private final FilterableLogContext filterableLogContext;
+
 	private LogLineAccumulator logLineAccumulator;
 	private LogLineUI current;
 
@@ -29,6 +37,30 @@ public class DataSourceUI {
 		sourcePath.setValue(file.getAbsolutePath());
 		sourceName.setValue(file.getName());
 		logLineAccumulator = new LogLineAccumulator();
+		filterableLogContext = new FilterableLogContext(this);
+//		lines.addListener((ListChangeListener<LogLineUI>) c -> {
+//			acquireLock();
+//			if (c.next()) {
+//				if (c.wasAdded()) {
+//					for (LogLineUI logLineUI : c.getAddedSubList()) {
+//						LogLineView logLineView = logLineUI.getLogLineView();
+//						if (logLineView == null) {
+//							unsynced.add(logLineUI);
+//						} else {
+//							filterableLogContext.getAllItems().add(logLineView);
+//						}
+//					}
+//					for (LogLineUI logLineUI : unsynced) {
+//						LogLineView logLineView = logLineUI.getLogLineView();
+//						if (logLineView != null) {
+//							filterableLogContext.getAllItems().add(logLineView);
+//						}
+//					}
+//				}
+//				//TODO: handle log rollover
+//			}
+//			releaseLock();
+//		});
 	}
 
 	public String getSourceName() {
@@ -59,6 +91,10 @@ public class DataSourceUI {
 
 	public void setSource(File source) {
 		this.source.set(source);
+	}
+
+	public FilterableLogContext getFilterableLogContext() {
+		return filterableLogContext;
 	}
 
 	@Override

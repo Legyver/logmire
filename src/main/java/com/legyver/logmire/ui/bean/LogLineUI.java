@@ -1,11 +1,13 @@
 package com.legyver.logmire.ui.bean;
 
+import com.legyver.logmire.ui.tabs.LogLineView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import java.util.StringJoiner;
 
-public class LogLineUI extends BaseLogEntry {
+public class LogLineUI extends BaseLogEntry implements Comparable {
 	/**
 	 * Full text.  Accumulated line-by-line
 	 */
@@ -52,7 +54,21 @@ public class LogLineUI extends BaseLogEntry {
 	 */
 	private String rootLocation;
 
+	/**
+	 * entry number in logfile after rolling up stacktrace
+	 */
+	private final Integer entryNumber;
+
+	/**
+	 * Reference to the UI view
+	 */
+	private LogLineView logLineView;
+
 	private final ObservableList<CausalSectionUI> causalStackTraceSections = FXCollections.observableArrayList();
+
+	public LogLineUI(int entryNumber) {
+		this.entryNumber = entryNumber;
+	}
 
 	public String getPlainText() {
 		return current.toString();
@@ -153,4 +169,37 @@ public class LogLineUI extends BaseLogEntry {
 		releaseLock();
 	}
 
+	public Integer getEntryNumber() {
+		return entryNumber;
+	}
+
+	public LogLineView getLogLineView() {
+		return logLineView;
+	}
+
+	public void setLogLineView(LogLineView logLineView) {
+		this.logLineView = logLineView;
+	}
+
+	//used for displaying search result lines in order
+	@Override
+	public int compareTo(Object o) {
+		return this.entryNumber.compareTo(((LogLineUI) o).entryNumber);
+	}
+
+	//used for indexing
+	@Override
+	public int hashCode() {
+		return entryNumber.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		//also counts as a null check
+		if (obj instanceof LogLineUI) {
+			return new EqualsBuilder()
+					.append(entryNumber, ((LogLineUI) obj).entryNumber).isEquals();
+		}
+		return false;
+	}
 }
