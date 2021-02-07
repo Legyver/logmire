@@ -1,11 +1,8 @@
 package com.legyver.logmire.config;
 
-import com.legyver.fenxlib.core.config.GsonApplicationConfig;
-import com.legyver.util.mapqua.mapbacked.MapBackedEntityCollection;
-import com.legyver.util.mapqua.mapbacked.MapBackedMap;
+import com.legyver.fenxlib.core.impl.config.GsonApplicationConfig;
+import com.legyver.utils.mapqua.mapbacked.MapBackedMap;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class LogmireConfig extends GsonApplicationConfig {

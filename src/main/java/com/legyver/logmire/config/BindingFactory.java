@@ -2,8 +2,8 @@ package com.legyver.logmire.config;
 
 import com.jfoenix.controls.JFXTabPane;
 
-import com.legyver.fenxlib.core.factory.options.BorderPaneInitializationOptions;
-import com.legyver.fenxlib.core.locator.query.ComponentQuery;
+import com.legyver.fenxlib.core.api.locator.query.ComponentQuery;
+import com.legyver.fenxlib.core.impl.factory.options.BorderPaneInitializationOptions;
 import com.legyver.fenxlib.extensions.tuktukfx.bindings.TaskAbortBindingFactory;
 import com.legyver.logmire.ui.bean.DataSourceUI;
 import com.legyver.logmire.ui.tabs.LogView;

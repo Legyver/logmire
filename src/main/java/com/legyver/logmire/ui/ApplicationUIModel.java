@@ -1,7 +1,7 @@
 package com.legyver.logmire.ui;
 
-import com.legyver.fenxlib.core.uimodel.FileOptions;
-import com.legyver.fenxlib.core.uimodel.RecentFileAware;
+import com.legyver.fenxlib.core.impl.uimodel.RecentFileAware;
+import com.legyver.fenxlib.core.impl.uimodel.FileOptions;
 import com.legyver.logmire.ui.bean.DataSourceUI;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;

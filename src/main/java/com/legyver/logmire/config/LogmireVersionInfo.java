@@ -1,7 +1,7 @@
 package com.legyver.logmire.config;
 
 import com.legyver.core.exception.CoreException;
-import com.legyver.fenxlib.core.widget.about.AboutPageOptions;
+import com.legyver.fenxlib.widgets.about.AboutPageOptions;
 
 import java.util.Properties;
 

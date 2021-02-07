@@ -1,14 +1,12 @@
 plugins {
     id 'java'
     id 'application'
-    id 'maven-publish'
-    id 'signing'
 }
 
 group 'com.legyver.logmire'
 
 ext {
-    fenxlibVersion = "2.0.0.0-alpha-2"
+    fenxlibVersion = "2.0.0.0-alpha-4"
     log4jVersion = "2.13.0"
 }
 
@@ -21,10 +19,9 @@ dependencies {
     //ui
 //    compile 'com.jfoenix:jfoenix:8.0.7' // Java 8
 
-    compile group: 'com.legyver', name: 'fenxlib-impl', version: fenxlibVersion
-    compile group: 'com.legyver', name: 'fenxlib-ext-tuktukfx', version: fenxlibVersion
-//    compile group: 'com.legyver', name: 'fenxlib-tasks', version: fenxlibVersion
-    compile group: 'com.legyver', name: 'fenxlib-widget-about', version: fenxlibVersion
+    compile group: 'com.legyver', name: 'fenxlib.core.impl', version: fenxlibVersion
+    compile group: 'com.legyver', name: 'fenxlib.extensions.tuktukfx', version: fenxlibVersion
+    compile group: 'com.legyver', name: 'fenxlib.widgets.about', version: fenxlibVersion
 
     //File utils
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
@@ -41,38 +38,4 @@ dependencies {
 
 application {
     mainClass = 'com.legyver.logmire.MainApplication'
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
-            }
-        }
-
-    }
-    repositories {
-        maven {
-            name = 'product-builds'
-            url = uri('/product-builds')
-        }
-    }
-}
-
-signing {
-    useGpgCmd()
-    sign publishing.publications.mavenJava
-}
-
-javadoc {
-    if(JavaVersion.current().isJava9Compatible()) {
-        options.addBooleanOption('html5', true)
-    }
 }

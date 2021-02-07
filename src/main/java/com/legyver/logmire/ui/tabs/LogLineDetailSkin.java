@@ -1,6 +1,6 @@
 package com.legyver.logmire.ui.tabs;
 
-import com.legyver.fenxlib.core.context.ApplicationContext;
+import com.legyver.fenxlib.core.impl.context.ApplicationContext;
 import com.legyver.logmire.ui.ApplicationUIModel;
 import com.legyver.logmire.ui.bean.CausalSectionUI;
 import javafx.beans.property.BooleanProperty;

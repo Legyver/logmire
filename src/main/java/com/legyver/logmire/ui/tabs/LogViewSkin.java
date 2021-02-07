@@ -1,6 +1,6 @@
 package com.legyver.logmire.ui.tabs;
 
-import com.legyver.fenxlib.core.context.ApplicationContext;
+import com.legyver.fenxlib.core.impl.context.ApplicationContext;
 import com.legyver.fenxlib.extensions.tuktukfx.task.adapter.JavaFxAdapter;
 import com.legyver.fenxlib.extensions.tuktukfx.task.exec.TaskExecutor;
 import com.legyver.logmire.event.ResetType;

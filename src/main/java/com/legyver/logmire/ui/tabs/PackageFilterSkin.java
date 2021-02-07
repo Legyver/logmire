@@ -2,11 +2,10 @@ package com.legyver.logmire.ui.tabs;
 
 import com.jfoenix.svg.SVGGlyph;
 import com.jfoenix.svg.SVGGlyphLoader;
-import com.legyver.fenxlib.core.context.ApplicationContext;
+import com.legyver.fenxlib.core.impl.context.ApplicationContext;
 import com.legyver.logmire.event.ResetType;
 import com.legyver.logmire.ui.ApplicationUIModel;
 import com.legyver.logmire.ui.search.FilterableLogContext;
-import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.ContextMenu;

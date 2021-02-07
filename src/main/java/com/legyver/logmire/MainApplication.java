@@ -1,11 +1,11 @@
 package com.legyver.logmire;
 
 import com.legyver.core.exception.CoreException;
-import com.legyver.fenxlib.core.config.options.ApplicationOptions;
-import com.legyver.fenxlib.core.context.ApplicationContext;
-import com.legyver.fenxlib.core.factory.*;
-import com.legyver.fenxlib.core.factory.options.BorderPaneInitializationOptions;
-import com.legyver.fenxlib.core.factory.options.RegionInitializationOptions;
+import com.legyver.fenxlib.core.impl.config.options.ApplicationOptions;
+import com.legyver.fenxlib.core.impl.context.ApplicationContext;
+import com.legyver.fenxlib.core.impl.factory.*;
+import com.legyver.fenxlib.core.impl.factory.options.BorderPaneInitializationOptions;
+import com.legyver.fenxlib.core.impl.factory.options.RegionInitializationOptions;
 import com.legyver.logmire.config.ApplicationOptionsBuilder;
 import com.legyver.logmire.config.BindingFactory;
 import com.legyver.logmire.config.LogmireConfig;
@@ -16,6 +16,7 @@ import com.legyver.logmire.task.TaskFactory;
 import com.legyver.logmire.task.openlog.OpenLogfileProcessor;
 import com.legyver.logmire.ui.ApplicationUIModel;
 import javafx.application.Application;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
@@ -46,7 +47,7 @@ public class MainApplication extends Application  {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			logger.info("Initializing application");
+//			logger.info("Initializing application");
 			applicationOptions.startup();
 			bindingFactory = new BindingFactory();
 			uiModel = (ApplicationUIModel) ApplicationContext.getUiModel();
@@ -79,6 +80,7 @@ public class MainApplication extends Application  {
 
 			primaryStage.setScene(sceneFactory.makeScene(root));
 			primaryStage.setTitle("Logmire");
+			primaryStage.getIcons().add(new Image(MainApplication.class.getResourceAsStream("/legyvinicon.png")));
 			primaryStage.show();
 		} catch (Exception ex) {
 			logger.error("Error in MainApplication.start() " + ex.getMessage(), ex);

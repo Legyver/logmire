@@ -1,10 +1,10 @@
 package com.legyver.logmire.config;
 
-import com.legyver.fenxlib.core.config.options.ApplicationOptions;
-import com.legyver.fenxlib.core.config.options.init.PreShutdownConfigSyncLifecycleHook;
-import com.legyver.fenxlib.core.config.options.init.SVGGlyphLoadingApplicationLifecycleHook;
-import com.legyver.fenxlib.core.config.options.init.UiModelConfigInitializer;
-import com.legyver.fenxlib.core.context.ApplicationContext;
+import com.legyver.fenxlib.core.impl.config.options.ApplicationOptions;
+import com.legyver.fenxlib.core.impl.config.options.init.PreShutdownConfigSyncLifecycleHook;
+import com.legyver.fenxlib.core.impl.config.options.init.SVGGlyphLoadingApplicationLifecycleHook;
+import com.legyver.fenxlib.core.impl.config.options.init.UiModelConfigInitializer;
+import com.legyver.fenxlib.core.impl.context.ApplicationContext;
 import com.legyver.fenxlib.extensions.tuktukfx.config.TaskLifecycleMixin;
 import com.legyver.logmire.ui.ApplicationUIModel;
 import javafx.beans.property.BooleanProperty;
@@ -14,8 +14,6 @@ import javafx.collections.ObservableMap;
 import java.util.stream.Collectors;
 
 public class ApplicationOptionsBuilder extends ApplicationOptions.Builder<ApplicationOptionsBuilder> implements TaskLifecycleMixin, IconConstants {
-
-
 
 	public ApplicationOptionsBuilder() {
 		super();
