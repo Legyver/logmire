@@ -1,7 +1,5 @@
 package com.legyver.logmire.ui.bean;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
 public class StackTraceElementUI {
 	private final String stackTraceElementLine;
 	private final String location;

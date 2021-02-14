@@ -3,11 +3,13 @@ plugins {
     id 'application'
 }
 
+apply from: 'https://raw.githubusercontent.com/Legyver/common-build/1.4/jarsigner.gradle'
+
 group 'com.legyver.logmire'
 
 ext {
-    fenxlibVersion = "2.0.0.0-alpha-4"
-    log4jVersion = "2.13.0"
+    fenxlibVersion = "2.0.0.0-rc1"
+    log4jVersion = "2.13.3"
 }
 
 repositories {
@@ -19,7 +21,6 @@ dependencies {
     //ui
 //    compile 'com.jfoenix:jfoenix:8.0.7' // Java 8
 
-    compile group: 'com.legyver', name: 'fenxlib.core.impl', version: fenxlibVersion
     compile group: 'com.legyver', name: 'fenxlib.extensions.tuktukfx', version: fenxlibVersion
     compile group: 'com.legyver', name: 'fenxlib.widgets.about', version: fenxlibVersion
 
@@ -27,7 +28,6 @@ dependencies {
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
 
     //logging
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
     compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: log4jVersion
 
@@ -37,5 +37,13 @@ dependencies {
 }
 
 application {
+    mainModule = 'com.legyver.logmire.samples' // name defined in module-info.java
     mainClass = 'com.legyver.logmire.MainApplication'
+}
+
+run {
+    //workaround for https://github.com/sshahine/JFoenix/issues/955
+    jvmArgs = [
+            '--add-opens=java.base/java.lang.reflect=com.jfoenix'
+    ]
 }
