@@ -1,6 +1,6 @@
 package com.legyver.logmire.ui.filter;
 
-import com.legyver.fenxlib.core.impl.context.ApplicationContext;
+import com.legyver.fenxlib.api.context.ApplicationContext;
 import com.legyver.logmire.ui.ApplicationUIModel;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;

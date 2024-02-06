@@ -1,6 +1,6 @@
 package com.legyver.logmire.ui.tabs;
 
-import com.legyver.fenxlib.core.impl.context.ApplicationContext;
+import com.legyver.fenxlib.api.context.ApplicationContext;
 import com.legyver.fenxlib.extensions.tuktukfx.task.adapter.JavaFxAdapter;
 import com.legyver.fenxlib.extensions.tuktukfx.task.exec.TaskExecutor;
 import com.legyver.logmire.event.ResetType;
@@ -74,7 +74,7 @@ public class LogViewSkin extends SkinBase<LogView> {
 				initialIndexLock.release();
 			}
 		});
-		TaskExecutor.INSTANCE.submitTask(mainIndexTaskAdapter);
+		TaskExecutor.getInstance().submitTask(mainIndexTaskAdapter);
 
 		observableList.addListener((ListChangeListener<LogLineUI>) c -> {
 			c.next();
@@ -90,7 +90,7 @@ public class LogViewSkin extends SkinBase<LogView> {
 							initialIndexLock.release();
 						}
 					});
-					TaskExecutor.INSTANCE.submitTask(mainIndexTaskAdapter);
+					TaskExecutor.getInstance().submitTask(mainIndexTaskAdapter);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

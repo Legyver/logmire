@@ -1,6 +1,6 @@
 package com.legyver.logmire.ui.search;
 
-import com.legyver.fenxlib.core.impl.context.ApplicationContext;
+import com.legyver.fenxlib.api.context.ApplicationContext;
 import com.legyver.fenxlib.extensions.tuktukfx.task.adapter.JavaFxAdapter;
 import com.legyver.fenxlib.extensions.tuktukfx.task.exec.TaskExecutor;
 import com.legyver.logmire.event.ResetType;
@@ -259,7 +259,7 @@ public class FilterableLogContext {
 			}
 			currentSearchTask = new WeakReference<>(adapter);
 
-			TaskExecutor.INSTANCE.submitTask(adapter);
+			TaskExecutor.getInstance().submitTask(adapter);
 		} else if (lastStateHash == null || hashCheck != lastStateHash.intValue()) {
 			//if initial load, or filter changed, re-run all items through filters
 			Platform.runLater(() -> {

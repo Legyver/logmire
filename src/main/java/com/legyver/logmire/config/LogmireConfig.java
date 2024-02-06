@@ -1,43 +1,46 @@
 package com.legyver.logmire.config;
 
-import com.legyver.fenxlib.core.impl.config.GsonApplicationConfig;
-import com.legyver.utils.mapqua.mapbacked.MapBackedMap;
+import com.legyver.fenxlib.api.config.section.ApplicationVersionedConfigSection;
+import com.legyver.fenxlib.api.config.section.ConfigPersisted;
+import com.legyver.fenxlib.core.config.CoreApplicationConfig;
 
 import java.util.Map;
 
-public class LogmireConfig extends GsonApplicationConfig {
+public class LogmireConfig extends CoreApplicationConfig implements ApplicationVersionedConfigSection {
 
-	private final MapBackedMap packageFilters;
-	private final MapBackedMap severityFilters;
+	@ConfigPersisted
+	private FilterConfigSection filters = new FilterConfigSection();
 
-	public LogmireConfig(Map map) {
-		super(map);
-		packageFilters = new MapBackedMap(map, "packageFilters");
-		severityFilters = new MapBackedMap(map, "severityFilters");
+	public LogmireConfig() {
+		super();
+	}
+
+	public FilterConfigSection getFilters() {
+		return filters;
 	}
 
 	public Map<String, Boolean> getPackageFilters() {
-		return packageFilters.get();
+		return filters.getPackageFilters();
 	}
 
 	public void setPackageFilters(Map<String, Boolean> set) {
-		packageFilters.set(set);
+		filters.setPackageFilters(set);
 	}
 
 	public Map<String, Boolean> getSeverityFilters() {
-		return severityFilters.get();
+		return filters.getSeverityFilters();
 	}
 
 	public void setSeverityFilters(Map<String, Boolean> set) {
-		severityFilters.set(set);
+		filters.setSeverityFilters(set);
 	}
 
 	public void setSeverityFilter(String severity, boolean value) {
-		severityFilters.put(severity, value);
+		filters.setSeverityFilter(severity, value);
 	}
 
 	public Boolean getSeverityFilter(String severity) {
-		return (Boolean) severityFilters.get(severity);
+		return (Boolean) filters.getSeverityFilter(severity);
 	}
 
 }

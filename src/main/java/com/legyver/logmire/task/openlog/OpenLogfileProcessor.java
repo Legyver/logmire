@@ -1,5 +1,6 @@
 package com.legyver.logmire.task.openlog;
 
+import com.legyver.core.exception.CoreException;
 import com.legyver.logmire.config.BindingFactory;
 import com.legyver.logmire.task.TaskFactory;
 import com.legyver.logmire.ui.bean.DataSourceUI;
@@ -37,12 +38,14 @@ public class OpenLogfileProcessor {
 			}
 			WatchService watcher = FileSystems.getDefault().newWatchService();
 			logFile.toPath().getParent().register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+			bindingFactory.bindNewTab(dataSource);
 
 		} catch (IOException e) {
 			logger.error("Errors reading logfile", e);
-		}
-		bindingFactory.bindNewTab(dataSource);
+		} catch (CoreException e) {
+            logger.error("Error binding tab", e);
+        }
 
-		return dataSource;
+        return dataSource;
 	}
 }

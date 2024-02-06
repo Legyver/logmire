@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration name="defaultConfiguration" status="warn" strict="true" monitorInterval="270">
     <properties>
-        <property name="patternlayout">%d{dd/MM/yyyy HH:mm:ss} %5p %c{1}:%L - %m%n</property>
+        <property name="patternlayout">%d{dd/MM/yyyy HH:mm:ss} %tid %5p %c{1}:%L - %m%n</property>
         <property name="filename">${sys:logmire.home.logging}/application.log</property>
         <property name="filenamePattern">${sys:logmire.home.logging}/application-%d{yyyy-MM-dd}.log.gz</property>
     </properties>
@@ -31,14 +31,17 @@
         </appender>
     </appenders>
     <Loggers>
+        <Logger name="com.legyver" level="INFO" additivity="false">
+            <appender-ref ref="AsyncFile" />
+        </Logger>
+        <Logger name="com.legyver.fenxlib.core.lifecycle" level="TRACE" additivity="false">
+            <appender-ref ref="AsyncFile" />
+        </Logger>
+        <Logger name="com.legyver.logmire.ui.search.InMemoryIndex" level="TRACE" additivity="false">
+            <appender-ref ref="AsyncFile" />
+        </Logger>
         <root level="ERROR">
             <appender-ref ref="AsyncFile" />
         </root>
-        <Logger name="com.legyver" level="INFO">
-            <appender-ref ref="Console" />
-        </Logger>
-        <Logger name="com.legyver.logmire.ui.search.InMemoryIndex" level="TRACE">
-            <appender-ref ref="AsyncFile" />
-        </Logger>
     </Loggers>
 </configuration>

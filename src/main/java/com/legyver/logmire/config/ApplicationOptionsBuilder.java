@@ -1,11 +1,11 @@
 package com.legyver.logmire.config;
 
-import com.legyver.fenxlib.core.impl.config.options.ApplicationOptions;
-import com.legyver.fenxlib.core.impl.config.options.init.PreShutdownConfigSyncLifecycleHook;
-import com.legyver.fenxlib.core.impl.config.options.init.SVGGlyphLoadingApplicationLifecycleHook;
-import com.legyver.fenxlib.core.impl.config.options.init.UiModelConfigInitializer;
-import com.legyver.fenxlib.core.impl.context.ApplicationContext;
-import com.legyver.fenxlib.extensions.tuktukfx.config.TaskLifecycleMixin;
+import com.legyver.fenxlib.api.config.ApplicationConfig;
+import com.legyver.fenxlib.api.config.options.ApplicationOptions;
+import com.legyver.fenxlib.api.context.ApplicationContext;
+import com.legyver.fenxlib.core.lifecycle.hooks.PreShutdownConfigSyncLifecycleHook;
+import com.legyver.fenxlib.core.lifecycle.hooks.UiModelConfigInitializer;
+import com.legyver.fenxlib.extensions.tuktukfx.config.TaskExecutorShutdownApplicationLifecycleHook;
 import com.legyver.logmire.ui.ApplicationUIModel;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -13,31 +13,31 @@ import javafx.collections.ObservableMap;
 
 import java.util.stream.Collectors;
 
-public class ApplicationOptionsBuilder extends ApplicationOptions.Builder<ApplicationOptionsBuilder> implements TaskLifecycleMixin, IconConstants {
+public class ApplicationOptionsBuilder extends ApplicationOptions.Builder<ApplicationOptionsBuilder> implements IconConstants {
 
 	public ApplicationOptionsBuilder() {
 		super();
-		registerLifecycleHook(shutDownThreadPoolOnExit());
-		registerLifecycleHook(new PreShutdownConfigSyncLifecycleHook<LogmireConfig>(){
+		registerLifecycleHook(new TaskExecutorShutdownApplicationLifecycleHook());
+		registerLifecycleHook(new PreShutdownConfigSyncLifecycleHook(){
 			@Override
 			public int getPriority() {
 				return super.getPriority() + 1;
 			}
 
 			@Override
-			protected void syncToConfig(LogmireConfig applicationConfig) {
+			protected void syncToConfig(ApplicationConfig applicationConfig) {
 				ApplicationUIModel applicationUIModel = (ApplicationUIModel) ApplicationContext.getUiModel();
-				syncPackageFiltersToConfig(applicationConfig, applicationUIModel);
-				syncSeverityFiltersToConfig(applicationConfig, applicationUIModel);
+				syncPackageFiltersToConfig((LogmireConfig) applicationConfig, applicationUIModel);
+				syncSeverityFiltersToConfig((LogmireConfig) applicationConfig, applicationUIModel);
 			}
 		});
-		registerLifecycleHook(new SVGGlyphLoadingApplicationLifecycleHook(FONTAWESOME_FREE_REGULAR, "/fonts/fa-free-regular.svg"));
-		registerLifecycleHook(new SVGGlyphLoadingApplicationLifecycleHook(FONTAWESOME_FREE_SOLID, "/fonts/fa-free-solid.svg"));
-		registerLifecycleHook(new UiModelConfigInitializer<LogmireConfig, ApplicationUIModel>() {
+//		registerLifecycleHook(new SVGGlyphLoadingApplicationLifecycleHook(FONTAWESOME_FREE_REGULAR, "/fonts/fa-free-regular.svg"));
+//		registerLifecycleHook(new SVGGlyphLoadingApplicationLifecycleHook(FONTAWESOME_FREE_SOLID, "/fonts/fa-free-solid.svg"));
+		registerLifecycleHook(new UiModelConfigInitializer<ApplicationUIModel>() {
 			@Override
-			protected void syncToUiModel(LogmireConfig applicationConfig, ApplicationUIModel uiModel) {
-				initPackageFilters(applicationConfig, uiModel);
-				initSeverityFilters(applicationConfig, uiModel);
+			protected void syncToUiModel(ApplicationConfig applicationConfig, ApplicationUIModel uiModel) {
+				initPackageFilters((LogmireConfig) applicationConfig, uiModel);
+				initSeverityFilters((LogmireConfig) applicationConfig, uiModel);
 			}
 		});
 	}

@@ -1,14 +1,15 @@
 package com.legyver.logmire.factory.util;
 
+import com.legyver.core.function.ThrowingConsumer;
+import com.legyver.fenxlib.api.files.FileOptions;
 import com.legyver.logmire.task.openlog.OpenLogfileProcessor;
 import com.legyver.logmire.ui.ApplicationUIModel;
 import com.legyver.logmire.ui.bean.DataSourceUI;
 
 import java.io.File;
 import java.util.Optional;
-import java.util.function.Consumer;
 
-public class OnFileOpen implements Consumer<File> {
+public class OnFileOpen implements ThrowingConsumer<FileOptions> {
 	private final ApplicationUIModel uiModel;
 	private final OpenLogfileProcessor importProcessor;
 
@@ -18,7 +19,8 @@ public class OnFileOpen implements Consumer<File> {
 	}
 
 	@Override
-	public void accept(File file) {
+	public void accept(FileOptions fileOptions) {
+		File file = fileOptions.getFile();
 		Optional<DataSourceUI> preexistingDataSource = uiModel.getOpenSources().stream()
 				.filter(ds -> ds.getSource().getAbsolutePath().equals(file.getAbsolutePath()))
 				.findFirst();

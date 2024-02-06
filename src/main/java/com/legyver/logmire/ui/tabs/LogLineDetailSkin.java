@@ -1,6 +1,10 @@
 package com.legyver.logmire.ui.tabs;
 
-import com.legyver.fenxlib.core.impl.context.ApplicationContext;
+import com.legyver.fenxlib.api.context.ApplicationContext;
+import com.legyver.fenxlib.api.icons.options.IconOptions;
+import com.legyver.fenxlib.controls.icon.IconControl;
+import com.legyver.fenxlib.icons.standard.IcoMoonFontEnum;
+import com.legyver.fenxlib.icons.standard.IcoMoonIconOptions;
 import com.legyver.logmire.ui.ApplicationUIModel;
 import com.legyver.logmire.ui.bean.CausalSectionUI;
 import javafx.beans.property.BooleanProperty;
@@ -21,6 +25,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -126,7 +131,7 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 			row+=3;
 			gridPane.add(stackLabel, 0, row);
 			gridPane.add(stacktrace, 1, row, 5, 4);
-			VBox vBox = iconVBox(onClickCopy(copyableClassRef), FONTAWESOME_ICON_COPY);
+			VBox vBox = iconVBox(onClickCopy(copyableClassRef), IcoMoonFontEnum.ICON_COPY);
 			gridPane.add(vBox, 6, row);
 			GridPane.setValignment(vBox, VPos.TOP);
 			GridPane.setHgrow(stacktrace, Priority.ALWAYS);
@@ -171,14 +176,14 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 	}
 
 	private void addCopyRow(int row, Label label, Node node, StringProperty copyableProperty) {
-		addIconRow(row, label, node, onClickCopy(copyableProperty), FONTAWESOME_ICON_COPY);
+		addIconRow(row, label, node, onClickCopy(copyableProperty), IcoMoonFontEnum.ICON_COPY);
 	}
 
 	private void addSettingsRow(int row, Label label, Node node, StringProperty hideableProperty) {
-		addIconRow(row, label, node, onClickHide(hideableProperty), FONTAWESOME_ICON_EYESLASH);
+		addIconRow(row, label, node, onClickHide(hideableProperty), IcoMoonFontEnum.ICON_EYE);
 	}
 
-	private void addIconRow(int row, Label label, Node node, EventHandler<MouseEvent> onClick, String icon) {
+	private void addIconRow(int row, Label label, Node node, EventHandler<MouseEvent> onClick, IcoMoonFontEnum icon) {
 		gridPane.add(label, 0, row);
 		gridPane.add(node, 1, row, 5, 1);
 		VBox vBox = iconVBox(onClick, icon);
@@ -187,16 +192,19 @@ public class LogLineDetailSkin extends SkinBase<LogLineDetail> {
 		GridPane.setHgrow(node, Priority.ALWAYS);
 	}
 
-	private VBox iconVBox(EventHandler<MouseEvent> onClick, String icon) {
-		SVGControl svgControl = new SVGControl();
-		svgControl.setSvgIcon(icon);
-//		"cog";
-		svgControl.setSvgIconPaint(Paint.valueOf("#68b1e3"));
-		svgControl.setSvgIconSize(18);
+	private VBox iconVBox(EventHandler<MouseEvent> onClick, IcoMoonFontEnum icon) {
+		IconControl iconControl = new IconControl();
+		IconOptions iconOptions = new IcoMoonIconOptions.Builder()
+				.icoMoonIcon(icon)
+				.iconColorString("#68b1e3")
+				.iconSize(18)
+				.build();
 
-		svgControl.setOnMouseClicked(onClick);
+		iconControl.setIconOptions(iconOptions);
+		iconControl.setOnMouseClicked(onClick);
+
 		Region spacer = new Region();
-		VBox vBox = new VBox(svgControl, spacer);
+		VBox vBox = new VBox(iconControl, spacer);
 		VBox.setVgrow(spacer, Priority.ALWAYS);
 		return vBox;
 	}
