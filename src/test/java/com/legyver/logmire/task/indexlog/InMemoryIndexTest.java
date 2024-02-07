@@ -4,12 +4,11 @@ import com.legyver.logmire.task.openlog.LogLineAccumulator;
 import com.legyver.logmire.task.search.SearchTaskContext;
 import com.legyver.logmire.ui.bean.LogLineUI;
 import com.legyver.logmire.ui.search.InMemoryIndex;
-import org.hamcrest.MatcherAssert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class InMemoryIndexTest {
 
@@ -23,22 +22,22 @@ public class InMemoryIndexTest {
 
 		{
 			List<LogLineUI> indexed = search(inMemoryIndex, "Starting");
-			MatcherAssert.assertThat(indexed, containsInAnyOrder(logLineUI));
+			assertThat(indexed).contains(logLineUI);
 		}
 
 		{
 			List<LogLineUI> indexed = search(inMemoryIndex, "Sta");
-			MatcherAssert.assertThat(indexed, containsInAnyOrder(logLineUI));
+			assertThat(indexed).contains(logLineUI);
 		}
 
 		{
 			List<LogLineUI> indexed = search(inMemoryIndex, "8090");
-			MatcherAssert.assertThat(indexed, containsInAnyOrder(logLineUI));
+			assertThat(indexed).contains(logLineUI);
 		}
 
 		{
 			List<LogLineUI> indexed = search(inMemoryIndex, "Starting Coyote");
-			MatcherAssert.assertThat(indexed, containsInAnyOrder(logLineUI));
+			assertThat(indexed).contains(logLineUI);
 		}
 
 	}
